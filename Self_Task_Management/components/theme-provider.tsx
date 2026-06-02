@@ -36,6 +36,13 @@ function isTypingTarget(target: EventTarget | null) {
 
 function ThemeHotkey() {
   const { resolvedTheme, setTheme } = useTheme()
+  const themeRef = React.useRef(resolvedTheme)
+
+  // Keep latest theme in a ref so the key listener doesn't need to re-subscribe
+  // every time the theme changes (avoids adding/removing listeners repeatedly).
+  React.useEffect(() => {
+    themeRef.current = resolvedTheme
+  }, [resolvedTheme])
 
   React.useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -47,7 +54,10 @@ function ThemeHotkey() {
         return
       }
 
-      if (event.key.toLowerCase() !== "d") {
+      // Only handle real KeyboardEvents. Some code (dev tools, extensions,
+      // or other libraries) may dispatch plain Events or CustomEvents with
+      // type "keydown" that lack a .key property.
+      if (!(event instanceof KeyboardEvent) || !event.key || event.key.toLowerCase() !== "d") {
         return
       }
 
@@ -55,7 +65,8 @@ function ThemeHotkey() {
         return
       }
 
-      setTheme(resolvedTheme === "dark" ? "light" : "dark")
+      const currentTheme = themeRef.current
+      setTheme(currentTheme === "dark" ? "light" : "dark")
     }
 
     window.addEventListener("keydown", onKeyDown)
@@ -63,7 +74,7 @@ function ThemeHotkey() {
     return () => {
       window.removeEventListener("keydown", onKeyDown)
     }
-  }, [resolvedTheme, setTheme])
+  }, [setTheme]) // setTheme from next-themes is stable
 
   return null
 }
