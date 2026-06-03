@@ -45,6 +45,12 @@ export function TasksDashboard() {
     setTasks(updated)
   }, [setTasks])
 
+  const clearAllFilters = useCallback(() => {
+    setStatusFilters([])
+    setPriorityFilters([])
+    setTagFilters([])
+  }, [])
+
   const availableTags = globalTags
 
   if (isInitialLoading) {
@@ -142,7 +148,7 @@ export function TasksDashboard() {
       </div>
 
       {/* Right: filter panel */}
-      <aside className="hidden lg:block w-64 shrink-0 border-l bg-card sticky top-14 h-[calc(100vh-3.5rem)] overflow-y-auto p-4">
+      <aside className="hidden lg:block w-72 shrink-0 border-l bg-card sticky top-14 h-[calc(100vh-3.5rem)] overflow-y-auto scrollbar-thin p-4">
         <FilterPanel
           statusFilters={statusFilters}
           onStatusChange={setStatusFilters}
@@ -152,6 +158,7 @@ export function TasksDashboard() {
           onTagChange={setTagFilters}
           availableTags={availableTags}
           tasksLoading={isInitialLoading}
+          onClearAll={clearAllFilters}
         />
       </aside>
     </div>

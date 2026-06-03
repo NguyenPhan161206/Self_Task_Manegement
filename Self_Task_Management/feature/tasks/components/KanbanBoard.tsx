@@ -56,15 +56,10 @@ function KanbanBoardInner({ tasks, onTasksChange, onEditTask }: KanbanBoardProps
     const activeId = active.id as number
     const overId = over.id as number | TaskStatus
 
-    // Find the source and target columns
-    let sourceStatus: TaskStatus | null = null
-    for (const s of TASK_STATUSES) {
-      if (grouped[s].some(t => t.id === activeId)) {
-        sourceStatus = s
-        break
-      }
-    }
-    if (!sourceStatus) return
+    // Find source column from active task
+    const activeTaskData = tasks.find(t => t.id === activeId)
+    if (!activeTaskData) return
+    const sourceStatus = activeTaskData.status as TaskStatus
 
     // If dropped on a column header
     if (TASK_STATUSES.includes(overId as TaskStatus)) {
@@ -96,7 +91,7 @@ function KanbanBoardInner({ tasks, onTasksChange, onEditTask }: KanbanBoardProps
         onTasksChange(updated)
       }
     }
-  }, [tasks, grouped, onTasksChange])
+  }, [tasks, onTasksChange])
 
   return (
     <DndContext
