@@ -1,150 +1,137 @@
 # Self Task Management
 
-Next.js 16 (App Router) + Supabase + shadcn/ui (radix-vega style) + Tailwind 4.
+Next.js 16 (App Router) + Supabase + shadcn/ui (radix-vega) + Tailwind 4 + Recharts.
 
-A personal task management app. Built to be **easy to scale**, **safe**, and **easy to explore**.
+A personal task management app with Kanban board, realtime sync, tags, charts, and auth.
 
-## Current status
-- Bare template running (`npm run dev` works).
-- Supabase connected via `.env` (keys present, client + admin patterns ready).
-- Theme (dark/light + `d` hotkey) + one example accordion.
-- **Home is now a beautiful fanpage-style landing page** — fully driven by `data/home.json`. Edit text, CTAs, testimonials, and image URLs there for instant changes. Images use `next/image` + picsum placeholders (replace paths in JSON with your own in `public/images/`).
-- **No real tasks/auth code yet** — the folder structure below is prepared so the first real features can be added cleanly.
+## Tech Stack
 
-## Project folder structure (scalable by design)
+| Layer | Technology |
+|-------|-----------|
+| Framework | Next.js 16 (Turbopack, App Router) |
+| Database | Supabase (PostgreSQL) |
+| Auth | Supabase Auth + RLS policies |
+| UI | shadcn/ui (Radix primitives) + Tailwind CSS 4 |
+| Charts | shadcn/chart + Recharts |
+| Drag & Drop | @dnd-kit |
+| Icons | Lucide React |
+| Language | TypeScript |
 
-We use the **existing `feature/` directory (singular, as pre-created)** + colocated `lib/` for cross-cutting concerns.
+## Route Map
+
+| Route | Type | Description |
+|-------|------|-------------|
+| `/` | Static → Dynamic* | Fanpage landing (data-driven from `data/home.json`) |
+| `/sign-in` | Static | Sign in form |
+| `/sign-up` | Static | Sign up form |
+| `/tasks` | Dynamic | Kanban board + task management (auth required) |
+| `/dashboard` | Dynamic | Charts & stats dashboard (auth required) |
+
+*\* `/` becomes dynamic when auth check is added for CTA redirect*
+
+## Current Status
+
+### ✅ Done
+- **Auth**: Sign-up / sign-in / sign-out, session management
+- **Auth bridge**: `auth_user_id` (UUID) mapping → `public.users` (bigint)
+- **RLS policies**: 12 policies covering users, tasks, personal_tasks
+- **Realtime**: tasks + task_tags subscribed via Supabase Realtime
+- **Task CRUD**: Create, edit, delete, update status
+- **Kanban board**: 3 columns (Cần làm / Đang làm / Hoàn thành), drag-and-drop with @dnd-kit
+- **Tags**: Global tag pool (max 10/user), M2M via task_tags, TagManager dialog, TagSelector
+- **Sidebar**: Collapsible navigation (Dashboard, Tasks, Groups — disabled)
+- **Dashboard**: Statistics cards, status pie chart, priority bar chart, trending line chart, tag bar chart, upcoming tasks
+- **Filter panel**: Multi-select (status / priority / tags), collapsible sections, color indicators, clear all
+- **Performance**: React.memo, useMemo, useCallback on all heavy components
+- **Home page**: Beautiful fanpage, data-driven from `data/home.json`
+
+### 🚧 In Progress
+- (none — planning next features)
+
+### 📋 Planned
+- Group / project feature
+- Notifications
+- Mobile responsive improvements
+
+## Project Structure
 
 ```
 /
-├── app/                  # Next.js App Router only (routing, layouts, pages)
-│   ├── layout.tsx
-│   ├── page.tsx
-│   └── globals.css
-├── components/           # Shared UI
-│   ├── ui/               # shadcn primitives ONLY (add via npx shadcn)
-│   └── theme-provider.tsx
-├── feature/              # ★ THE KEY FOR SCALING (vertical slices / feature folders)
-│   ├── auth/             # Authentication & session
-│   │   ├── components/
-│   │   ├── hooks/
-│   │   ├── actions.ts    # Server Actions
-│   │   ├── types.ts
-│   │   ├── index.ts      # Public barrel
-│   │   └── README.md
-│   ├── tasks/            # Core domain: the actual task management
-│   │   ├── components/   # TaskCard, TaskForm, TaskList (use ui/ + lucide)
-│   │   ├── hooks/        # useTasks, useTaskFilters
-│   │   ├── actions.ts    # createTask, updateTaskStatus, deleteTask...
-│   │   ├── lib/          # queries, realtime subscriptions
-│   │   ├── types.ts
-│   │   ├── utils.ts
-│   │   ├── index.ts
-│   │   └── README.md
-│   └── (add more: projects/, notifications/, settings/ ...)
-├── lib/                  # Cross-feature utilities & infrastructure
-│   ├── utils.ts          # cn() + other pure helpers
-│   └── supabase/         # ★ SAFE CLIENT SEPARATION
-│       ├── client.ts     # Browser-safe (public anon key)
-│       ├── server.ts     # Server-only (service key or user token)
-│       ├── index.ts
-│       └── README.md (safety rules)
-├── hooks/                # Only truly global hooks (most live in feature/*/hooks)
-├── types/                # Global/shared types (e.g. database.ts)
-│   └── database.ts       # Supabase types (generate from your project)
-├── public/
-├── README.md             # You are here
-└── (configs: package.json, tsconfig.json, components.json, .env, ...)
+├── app/                      # Next.js App Router
+│   ├── dashboard/            # Charts dashboard page
+│   ├── sign-in/              # Sign in page
+│   ├── sign-up/              # Sign up page
+│   ├── tasks/                # Tasks page (Kanban + filter)
+│   ├── layout.tsx            # Root layout (header + sidebar + main)
+│   ├── page.tsx              # Fanpage landing
+│   └── globals.css           # Global styles + theme variables
+├── components/
+│   ├── ui/                   # shadcn/ui primitives (button, card, dialog, etc.)
+│   ├── app-header.tsx        # Top navigation bar
+│   └── app-sidebar.tsx       # Left sidebar navigation
+├── feature/                  # ★ Vertical feature slices
+│   ├── auth/                 # Authentication (components, hooks, actions)
+│   ├── tasks/                # Core task management (Kanban, CRUD, filters)
+│   ├── tags/                 # Tag management (CRUD, global pool, M2M)
+│   └── charts/               # Dashboard charts (5 chart types + DashboardView)
+├── data/
+│   └── home.json             # Fanpage content (edit text, CTAs, testimonials here)
+├── lib/
+│   ├── utils.ts              # cn() + helpers
+│   └── supabase/             # Supabase clients (server.ts, client.ts)
+├── types/
+│   └── database.ts           # Supabase generated types
+├── scripts/                  # CLI utilities (test accounts, etc.)
+└── supabase/
+    └── migrations/           # Database migrations
 ```
 
-### Why this structure?
-- **Easy to upscale**: Add a whole new capability by creating `feature/whatever/`. Delete by removing one folder. No hunting across app/, components/, lib/.
-- **Safe**: 
-  - `lib/supabase/server.ts` vs `client.ts` makes it obvious where secrets can be used.
-  - Server Actions live next to the feature that owns the data.
-  - Types are co-located with the code that uses them.
-- **Easy to explore**: 
-  - New person? Open `feature/tasks/README.md` — everything they need is described + the files are right there.
-  - Consistent layout in every `feature/*`.
-  - Barrel `index.ts` tells you the public surface.
-- Uses the pre-existing `feature/` + `hooks/` + `lib/` directories + shadcn aliases.
+## Getting Started
 
-## Adding a new feature (the "upscale" recipe)
+### Prerequisites
+- Node.js 20+
+- Supabase project (local or hosted)
 
-1. `mkdir -p feature/my-new-thing/{components,hooks,lib}`
-2. Copy the folder layout + files from `feature/tasks/` or `feature/auth/`
-3. Fill `README.md` first (forces clarity)
-4. Export from `feature/my-new-thing/index.ts`
-5. Use: `import { MyThing } from '@/feature/my-new-thing'`
-6. (Optional) Add `"my-new-thing"` alias in `components.json` if you want shadcn to know about it later.
+### Environment Variables
 
-## Adding shadcn/ui components
+Create `.env`:
 
 ```bash
-npx shadcn@latest add button
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key  # for admin operations
 ```
 
-They go into `components/ui/` (kept pristine — only primitives).
-
-Feature-specific composed components go in `feature/*/components/`.
-
-## Supabase + safety
-
-- Client components / browser → `import { supabase } from '@/lib/supabase/client'`
-- Server Actions / RSC / API → `import { createServerClient, supabaseAdmin } from '@/lib/supabase/server'`
-- See `lib/supabase/README.md` (created with the structure) for rules.
-- **Never** import the server file from a client component (Next bundler + our folder layout makes this natural).
-
-Future improvement: add `@supabase/ssr` and `createBrowserClient` / `createServerClient` + middleware for cookie-based sessions.
-
-## Types
-
-`types/database.ts` is a hand-written stand-in.
-
-When your Supabase schema (tasks table etc.) is stable:
+### Install & Run
 
 ```bash
-# After linking project (supabase CLI)
-npx supabase gen types typescript --linked > types/database.ts
+npm install
+npm run dev
 ```
 
-Then update `feature/tasks/types.ts` etc. to re-export from it.
+### Database Migrations
+
+```bash
+npx supabase migration up
+```
+
+Or apply manually via Supabase SQL editor.
 
 ## Scripts
 
-- `npm run dev`
-- `npm run build`
-- `npm run typecheck`
-- `npm run lint`
-- `npm run format`
-- `npm run dev:create-accounts -- --count 10` — **Dev only**: instantly create N test accounts (with username) for easy multi-user testing. No email confirmation needed. Use `--help` for options. See `scripts/create-test-accounts.ts`.
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server (Turbopack) |
+| `npm run build` | Production build |
+| `npm run lint` | Lint check |
+| `npm run format` | Format code |
+| `npm run dev:create-accounts -- --count 10` | Create N test accounts (dev only) |
 
-## Dev testing accounts
-For developers who want to create many accounts for testing without friction:
-Use the script above. It uses the service role to create accounts with `email_confirm: true` and a simple shared password.
+## Key Architecture Decisions
 
-**Note:** We removed the previous in-app /dev/test-accounts UI route because it was causing Next.js Turbopack to repeatedly recompile (due to internal route type generation picking up the /dev segment and conflicting with root route validators in .next/dev/types). The CLI script is more reliable and doesn't pollute the app route tree.
-
-## Original shadcn template instructions (kept for reference)
-
-### Adding components
-
-To add components to your app, run the following command:
-
-```bash
-npx shadcn@latest add button
-```
-
-This will place the ui components in the `components` directory.
-
-### Using components
-
-To use the components in your app, import them as follows:
-
-```tsx
-import { Button } from "@/components/ui/button";
-```
-
----
-
-**This structure was created so the app can grow from "Project ready!" placeholder into a real, maintainable Self Task Management tool without becoming a mess.** Start implementing inside `feature/tasks/` and `feature/auth/`.
+- **Auth-first flow**: Supabase Auth user (UUID) created first, then `public.users` (bigint) with `auth_user_id` mapping
+- **RLS via subquery**: `(SELECT id FROM users WHERE auth_user_id = auth.uid())` to map Auth UUID → users.id
+- **Tag limit enforced at DB**: Trigger `check_tags_per_user_limit()` — cannot bypass via app
+- **Feature folders**: Each capability is a self-contained `feature/*/` with components, hooks, actions, types
+- **Fanpage data-driven**: All text, CTAs, and images in `data/home.json` — edit without touching code
+- **Chart colors**: Pastel palette, status/priority assigned fixed colors (not index-based)
