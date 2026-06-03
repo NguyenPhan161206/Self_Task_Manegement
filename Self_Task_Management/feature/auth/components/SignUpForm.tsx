@@ -29,9 +29,8 @@ export function SignUpForm() {
         toast.success('Tài khoản đã được tạo!', {
           description: result.message || 'Bây giờ bạn có thể đăng nhập.',
         })
-        setTimeout(() => {
-          router.push('/sign-in')
-        }, 800)
+        router.push('/tasks')
+        router.refresh()
       } else {
         setError(result.error || 'Đăng ký thất bại')
       }

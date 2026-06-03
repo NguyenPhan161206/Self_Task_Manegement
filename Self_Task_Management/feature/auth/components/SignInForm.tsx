@@ -29,7 +29,7 @@ export function SignInForm() {
         toast.success('Chào mừng trở lại!', {
           description: 'Bạn đã đăng nhập thành công.',
         })
-        router.push('/')
+        router.push('/tasks')
         router.refresh()
       } else {
         setError(result.error || 'Đăng nhập thất bại')

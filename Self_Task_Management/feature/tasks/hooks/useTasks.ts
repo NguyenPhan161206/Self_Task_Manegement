@@ -1,33 +1,95 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
-import type { Task, TaskFilter } from '../types'
-import { filterTasks } from '../utils'
+import { createClient } from '@/lib/supabase/client'
+import { enrichTask } from '../utils'
+import type { Task, TaskFilter, TaskWithMeta } from '../types'
+import { useTaskSubscription } from './useTaskSubscription'
 
-// Stub hook demonstrating the pattern
-// Real version will use Supabase client + realtime channel subscription
-export function useTasks(initialTasks: Task[] = [], filter: TaskFilter = {}) {
-  const [tasks, setTasks] = useState<Task[]>(initialTasks)
-  const [isLoading, setIsLoading] = useState(false)
+export function useTasks(filter: TaskFilter = {}) {
+  const [tasks, setTasks] = useState<TaskWithMeta[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  // Simulate loading / refetch
-  const refetch = async () => {
+  const fetchTasks = useCallback(async () => {
     setIsLoading(true)
-    // TODO: const data = await fetchTasksFromServerAction() or supabase query via client
-    setTimeout(() => setIsLoading(false), 120)
-  }
+    setError(null)
 
-  const filtered = filterTasks(tasks, filter)
+    try {
+      const supabase = createClient()
 
-  // TODO: setup realtime
-  // useEffect(() => { const channel = supabase.channel('tasks')... })
+      // Get current auth user UUID
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        setTasks([])
+        setIsLoading(false)
+        return
+      }
+
+      // Find users.id from auth_user_id
+      const { data: userRow } = await supabase
+        .from('users')
+        .select('id')
+        .eq('auth_user_id', user.id)
+        .single()
+
+      if (!userRow) {
+        setTasks([])
+        setIsLoading(false)
+        return
+      }
+
+      // Query tasks via personal_tasks
+      let query = supabase
+        .from('personal_tasks')
+        .select('task_id, tasks(*)')
+        .eq('user_id', userRow.id)
+
+      if (filter.status && filter.status !== 'all') {
+        query = query.eq('tasks.status', filter.status)
+      }
+      if (filter.priority && filter.priority !== 'all') {
+        query = query.eq('tasks.priority', filter.priority)
+      }
+
+      const { data, error: queryError } = await query
+
+      if (queryError) {
+        setError(queryError.message)
+        setIsLoading(false)
+        return
+      }
+
+      let result: Task[] = (data || [])
+        .map(item => (item.tasks as Task | null))
+        .filter((t): t is Task => t !== null)
+
+      // Client-side search filter
+      if (filter.search) {
+        const q = filter.search.toLowerCase()
+        result = result.filter(t => t.title.toLowerCase().includes(q))
+      }
+
+      setTasks(result.map(enrichTask))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Lỗi khi tải nhiệm vụ')
+    } finally {
+      setIsLoading(false)
+    }
+  }, [filter.status, filter.priority, filter.search])
+
+  useTaskSubscription(fetchTasks)
+
+  useEffect(() => {
+    fetchTasks()
+  }, [fetchTasks])
 
   return {
-    tasks: filtered,
-    allTasks: tasks,
+    tasks,
     isLoading,
-    refetch,
-    setTasks, // for optimistic updates
+    error,
+    refetch: fetchTasks,
+    setTasks,
   }
 }

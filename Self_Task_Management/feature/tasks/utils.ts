@@ -29,7 +29,10 @@ export function groupTasksByStatus(tasks: Task[]): Record<TaskStatus, TaskWithMe
   }
   for (const t of tasks) {
     const enriched = enrichTask(t)
-    groups[t.status].push(enriched)
+    const status = t.status as TaskStatus | null
+    if (status && status in groups) {
+      groups[status].push(enriched)
+    }
   }
   return groups
 }

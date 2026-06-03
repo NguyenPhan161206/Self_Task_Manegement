@@ -36,14 +36,15 @@ export async function signInWithPassword(formData: FormData) {
 /**
  * Server Action: Sign up new user (username + email + password).
  *
- * Flow (DB-first, then Auth):
+ * Flow (Auth-first, then DB):
  *  1. Validate inputs
  *  2. Hash password (scrypt — Node.js built-in, no extra deps)
- *  3. INSERT into public."user" (email, username, password_hash)
- *  4. Only if ③ succeeds → create Supabase Auth user with the SAME UUID
- *  5. If Auth creation fails → rollback the user row
+ *  3. Create Supabase Auth user via admin API
+ *  4. Only if ③ succeeds → INSERT into public.users (username, email, auth_user_id, password_hash)
+ *  5. If DB insert fails → rollback the Auth user
  *
- * This guarantees we never have an orphaned Auth user without a DB user.
+ * Auth-first flow because public.users.id is auto-increment bigint,
+ * not a UUID we can pre-generate. auth_user_id bridges the two systems.
  */
 export async function signUp(formData: FormData) {
   const username = (formData.get('username') as string || '').trim()
@@ -76,25 +77,42 @@ export async function signUp(formData: FormData) {
   const { hashPassword } = await import('./lib/password')
   const passwordHash = await hashPassword(password)
 
-  // ── Step 2: Generate shared UUID for DB user + auth user ───
-  const userId = crypto.randomUUID()
-
-  // ── Step 3: INSERT into user table (DB-first) ──────────
   const { supabaseAdmin } = await import('@/lib/supabase/server')
 
-  // Giả định bảng của bạn tên là 'user' và có các cột id, email, username, password_hash
-  // Nếu cột mật khẩu của bạn tên là 'password', hãy đổi 'password_hash' thành 'password'
+  // ── Step 2: Create Auth user first (Auth-first) ────────────
+  const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+    user_metadata: { username },
+  })
+
+  if (authError) {
+    if (authError.message?.includes('already registered')) {
+      return { success: false, error: 'Email này đã được sử dụng.' }
+    }
+    return {
+      success: false,
+      error: authError.message || 'Không thể tạo tài khoản xác thực.',
+    }
+  }
+
+  const authUserId = authData.user.id
+
+  // ── Step 3: INSERT into public.users ──────────────────────────
   const { error: dbError } = await supabaseAdmin
-    .from('user')
+    .from('users')
     .insert({
-      id: userId,
-      email,
       username,
+      email,
       password_hash: passwordHash,
+      auth_user_id: authUserId,
     })
 
   if (dbError) {
-    // Handle unique constraint violations (Postgres error code 23505)
+    // ── Rollback: remove the Auth user ────────────────────────
+    await supabaseAdmin.auth.admin.deleteUser(authUserId)
+
     if (dbError.code === '23505') {
       if (dbError.message?.includes('email')) {
         return { success: false, error: 'Email này đã được sử dụng.' }
@@ -110,32 +128,15 @@ export async function signUp(formData: FormData) {
     }
   }
 
-  // ── Step 4: Create Auth user (only after DB success) ───────
-  const { error: authError } = await supabaseAdmin.auth.admin.createUser({
-    id: userId, // same UUID so user.id === auth.users.id
-    email,
-    password,
-    email_confirm: true, // skip email confirmation for now
-    user_metadata: {
-      username,
-    },
-  })
-
-  if (authError) {
-    // ── Rollback: remove the user we just inserted ────────
-    await supabaseAdmin.from('user').delete().eq('id', userId)
-
-    return {
-      success: false,
-      error: authError.message || 'Không thể tạo tài khoản xác thực.',
-    }
-  }
+  // ── Step 4: Auto sign-in (so user doesn't need to login again) ──
+  const supabase = await createClient()
+  await supabase.auth.signInWithPassword({ email, password })
 
   revalidatePath('/', 'layout')
 
   return {
     success: true,
-    message: 'Tài khoản đã được tạo thành công! Bạn có thể đăng nhập ngay.',
+    message: 'Tài khoản đã được tạo thành công!',
   }
 }
 
@@ -201,19 +202,29 @@ export async function createTestAccounts(
     const email = `${prefix}-${i}@dev.test`
 
     try {
-      const { error } = await supabaseAdmin.auth.admin.createUser({
+      const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
         email,
         password,
-        email_confirm: true, // bypass confirmation
-        user_metadata: {
-          username,
-        },
+        email_confirm: true,
+        user_metadata: { username },
       })
 
-      if (error) {
-        results.push({ username, email, success: false, error: error.message })
+      if (authError) {
+        results.push({ username, email, success: false, error: authError.message })
       } else {
-        results.push({ username, email, success: true })
+        // Also insert into public.users so the user record exists
+        const { hashPassword } = await import('./lib/password')
+        const pwdHash = await hashPassword(password)
+        const { error: dbError } = await supabaseAdmin
+          .from('users')
+          .insert({ username, email, password_hash: pwdHash, auth_user_id: authData.user.id })
+        if (dbError) {
+          // Rollback auth user
+          await supabaseAdmin.auth.admin.deleteUser(authData.user.id)
+          results.push({ username, email, success: false, error: dbError.message })
+        } else {
+          results.push({ username, email, success: true })
+        }
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Unknown error'

@@ -37,7 +37,7 @@ export function AppHeader() {
           <Link href="/" className="text-foreground/60 hover:text-foreground transition-colors">
             Trang chủ
           </Link>
-          <Link href="/sign-in" className="text-foreground/60 hover:text-foreground transition-colors">
+          <Link href="/tasks" className="text-foreground/60 hover:text-foreground transition-colors">
             Nhiệm vụ
           </Link>
         </nav>
@@ -71,7 +71,7 @@ export function AppHeader() {
                   <Link href="/">Bảng điều khiển</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href="/sign-in">Nhiệm vụ của tôi</Link>
+                  <Link href="/tasks">Nhiệm vụ của tôi</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem

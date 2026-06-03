@@ -4,3 +4,4 @@
 export * from './types'
 export { useAuth } from './hooks/useAuth'
 export { signInWithPassword, signUp, signOut, getCurrentUser } from './actions'
+export { getUserIdFromAuth } from './lib/getUserId'

@@ -1,30 +1,47 @@
+'use server'
+
+import { createClient } from '@/lib/supabase/server'
+import { getUserIdFromAuth } from '@/feature/auth/lib/getUserId'
+
 import type { Task, TaskFilter } from '../types'
 
-// Example data access layer colocated in the feature.
-// In real app these would talk to Supabase via the safe clients in @/lib/supabase
-// or call server actions.
-
 export async function getTasks(filter?: TaskFilter): Promise<Task[]> {
-  // const supabase = createClient()
-  // let q = supabase.from('tasks').select('*')
-  // if (filter?.status && filter.status !== 'all') q = q.eq('status', filter.status)
-  // const { data } = await q.order('created_at', { ascending: false })
-  // return data || []
+  const supabase = await createClient()
+  const userId = await getUserIdFromAuth()
+  if (!userId) return []
 
-  console.log('[feature/tasks/lib/queries] getTasks STUB', filter)
-  return [] // return seed data in future
+  // Query tasks via personal_tasks junction table
+  let query = supabase
+    .from('personal_tasks')
+    .select('task_id, tasks(*)')
+    .eq('user_id', userId)
+
+  if (filter?.status && filter.status !== 'all') {
+    query = query.eq('tasks.status', filter.status)
+  }
+  if (filter?.priority && filter.priority !== 'all') {
+    query = query.eq('tasks.priority', filter.priority)
+  }
+
+  const { data, error } = await query
+
+  if (error || !data) return []
+
+  let tasks: Task[] = data
+    .map(item => (item.tasks as Task | null))
+    .filter((t): t is Task => t !== null)
+
+  if (filter?.search) {
+    const q = filter.search.toLowerCase()
+    tasks = tasks.filter(t => t.title.toLowerCase().includes(q))
+  }
+
+  return tasks
 }
 
-export function subscribeToTasks(/* _callback */ _callback: (tasks: Task[]) => void) { // eslint-disable-line @typescript-eslint/no-unused-vars
-  // const supabase = createClient()
-  // const channel = supabase
-  //   .channel('public:tasks')
-  //   .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, () => { ... })
-  //   .subscribe()
-
+export function subscribeToTasks(_callback: (tasks: Task[]) => void) {
   console.log('[feature/tasks/lib] subscribeToTasks STUB (realtime would be here)')
   return () => {
-    // channel.unsubscribe()
     console.log('[feature/tasks/lib] unsubscribed (stub)')
   }
 }

@@ -206,16 +206,23 @@ export default function FanpageHome() {
             </div>
 
             <div className="mx-auto mt-10 max-w-3xl space-y-3">
-              {content.demo.tasks.map((task) => (
+              {content.demo.tasks.map((task, idx) => (
                 <TaskCard
                   key={task.id}
                   task={{
-                    ...task,
+                    id: idx + 1,
+                    title: task.title,
                     description: task.description ?? null,
-                    user_id: 'demo',
-                    created_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString(),
+                    status: task.status,
+                    priority: task.priority,
                     due_date: null,
+                    start_date: null,
+                    completed_date: null,
+                    tags: null,
+                    attachments: null,
+                    creator_id: null,
+                    last_updated_by: null,
+                    group_id: null,
                     isOverdue: false,
                     daysUntilDue: null,
                   }}

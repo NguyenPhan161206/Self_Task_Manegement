@@ -2,60 +2,103 @@
 
 import { revalidatePath } from 'next/cache'
 
-// import { createServerClient } from '@/lib/supabase/server'  // TODO: uncomment when implementing real server actions with Supabase
+import { createClient } from '@/lib/supabase/server'
+import { getUserIdFromAuth } from '@/feature/auth/lib/getUserId'
 
-import type { Task, TaskInsert, /* TaskUpdate, */ TaskStatus } from './types'
+import type { Task, TaskInsert, TaskUpdate, TaskStatus, TaskPriority } from './types'
 
-// Server Actions for tasks. These are the ONLY place mutations should happen from the server.
-// Call them from client forms with <form action={createTask}>
-
-export async function createTask(formData: FormData | TaskInsert) {
-  // const supabase = createServerClient() // or pass user token  -- TODO: use when wiring real DB
-
-  let input: TaskInsert
-  if (formData instanceof FormData) {
-    input = {
-      title: formData.get('title') as string,
-      description: (formData.get('description') as string) || null,
-      status: (formData.get('status') as TaskStatus) || 'todo',
-      priority: ((formData.get('priority') as Task['priority']) || 'medium'),
-      // user_id should come from auth, not form in real app
-      user_id: 'demo-user', // TODO: replace with real auth.getUser().id
-    }
-  } else {
-    input = formData
-  }
-
-  // const { data, error } = await supabase.from('tasks').insert(input).select().single()
-  // if (error) throw error
-
-  console.log('[feature/tasks/actions] createTask STUB', input)
-
-  revalidatePath('/tasks')
-  revalidatePath('/')
-  const stubTask = { id: 'stub-' + Date.now(), ...input, created_at: new Date().toISOString(), updated_at: new Date().toISOString() } as const
-  return { success: true, task: stubTask }
+function todayStr(): string {
+  return new Date().toISOString().split('T')[0]
 }
 
-export async function updateTaskStatus(taskId: string, status: TaskStatus) {
-  // const supabase = createServerClient()
+export async function createTask(formData: FormData) {
+  const supabase = await createClient()
+  const creatorId = await getUserIdFromAuth()
+  if (!creatorId) return { success: false, error: 'Chưa đăng nhập.' }
 
-  // await supabase.from('tasks').update({ status, updated_at: new Date().toISOString() }).eq('id', taskId)
+  const title = formData.get('title') as string
+  if (!title || !title.trim()) return { success: false, error: 'Tiêu đề không được để trống.' }
 
-  console.log('[feature/tasks/actions] updateTaskStatus STUB', { taskId, status })
+  const description = (formData.get('description') as string) || null
+  const status = ((formData.get('status') as string) || 'todo') as TaskStatus
+  const priority = ((formData.get('priority') as string) || 'medium') as TaskPriority
+  const dueDate = (formData.get('due_date') as string) || null
+
+  const { data: task, error } = await supabase
+    .from('tasks')
+    .insert({
+      title: title.trim(),
+      description,
+      status,
+      priority,
+      due_date: dueDate,
+      creator_id: creatorId,
+    })
+    .select()
+    .single()
+
+  if (error) return { success: false, error: error.message }
+
+  // Also link task to user via personal_tasks
+  await supabase
+    .from('personal_tasks')
+    .insert({ task_id: task.id, user_id: creatorId })
+
+  revalidatePath('/tasks')
+  return { success: true, task }
+}
+
+export async function updateTaskStatus(taskId: number, status: TaskStatus) {
+  const supabase = await createClient()
+  const userId = await getUserIdFromAuth()
+  if (!userId) return { success: false, error: 'Chưa đăng nhập.' }
+
+  const { error } = await supabase
+    .from('tasks')
+    .update({
+      status,
+      last_updated_by: userId,
+      completed_date: status === 'done' ? todayStr() : null,
+    })
+    .eq('id', taskId)
+
+  if (error) return { success: false, error: error.message }
 
   revalidatePath('/tasks')
   return { success: true }
 }
 
-export async function deleteTask(taskId: string) {
-  // const supabase = createServerClient()
-  // await supabase.from('tasks').delete().eq('id', taskId)
+export async function updateTask(taskId: number, data: Partial<TaskUpdate>) {
+  const supabase = await createClient()
+  const userId = await getUserIdFromAuth()
+  if (!userId) return { success: false, error: 'Chưa đăng nhập.' }
 
-  console.log('[feature/tasks/actions] deleteTask STUB', taskId)
+  const { error } = await supabase
+    .from('tasks')
+    .update({ ...data, last_updated_by: userId })
+    .eq('id', taskId)
+
+  if (error) return { success: false, error: error.message }
 
   revalidatePath('/tasks')
   return { success: true }
 }
 
-// Add more: bulkUpdate, assignTask, etc.
+export async function deleteTask(taskId: number) {
+  const supabase = await createClient()
+  const userId = await getUserIdFromAuth()
+  if (!userId) return { success: false, error: 'Chưa đăng nhập.' }
+
+  // Delete personal_tasks link first
+  await supabase.from('personal_tasks').delete().eq('task_id', taskId)
+
+  const { error } = await supabase
+    .from('tasks')
+    .delete()
+    .eq('id', taskId)
+
+  if (error) return { success: false, error: error.message }
+
+  revalidatePath('/tasks')
+  return { success: true }
+}
