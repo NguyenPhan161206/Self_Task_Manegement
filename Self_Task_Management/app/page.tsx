@@ -7,6 +7,7 @@ import { TaskCard } from '@/feature/tasks/components/TaskCard'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 
+import { createClient } from '@/lib/supabase/server'
 import type { HomeContent } from '@/data/home'
 import homeContent from '@/data/home.json'
 
@@ -28,8 +29,15 @@ function DynamicIcon({ name, className = 'h-5 w-5' }: { name: string; className?
   return <Icon className={className} />
 }
 
-export default function FanpageHome() {
+export default async function FanpageHome() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const isAuthenticated = !!user
+
   const content = homeContent as HomeContent
+
+  const primaryCtaHref = isAuthenticated ? '/tasks' : content.hero.primaryCta.href
+  const finalCtaPrimaryHref = isAuthenticated ? '/tasks' : (content.finalCta?.primaryCta.href ?? '/sign-up')
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -54,7 +62,7 @@ export default function FanpageHome() {
 
             <div className="flex flex-wrap gap-3 pt-2 justify-center lg:justify-start">
               <Button asChild size="lg" className="group h-12 px-8 text-base">
-                <a href={content.hero.primaryCta.href}>
+                <a href={primaryCtaHref}>
                   {content.hero.primaryCta.text}
                   <ArrowRight className="ml-2 h-4 w-4 transition group-hover:translate-x-0.5" />
                 </a>
@@ -248,7 +256,7 @@ export default function FanpageHome() {
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <Button asChild size="lg" className="h-12 px-10 text-base">
-                <a href={content.finalCta.primaryCta.href}>{content.finalCta.primaryCta.text}</a>
+                <a href={finalCtaPrimaryHref}>{content.finalCta.primaryCta.text}</a>
               </Button>
               {content.finalCta.secondaryCta && (
                 <Button asChild variant="outline" size="lg" className="h-12 px-10 text-base">
