@@ -26,14 +26,14 @@ export function SignUpForm() {
       const result = await signUp(formData)
 
       if (result.success) {
-        toast.success('Account created!', {
-          description: result.message || 'You can now sign in.',
+        toast.success('Tài khoản đã được tạo!', {
+          description: result.message || 'Bây giờ bạn có thể đăng nhập.',
         })
         setTimeout(() => {
           router.push('/sign-in')
         }, 800)
       } else {
-        setError(result.error || 'Sign up failed')
+        setError(result.error || 'Đăng ký thất bại')
       }
     })
   }
@@ -42,10 +42,10 @@ export function SignUpForm() {
     <Card className="w-full max-w-md border-border/60 shadow-xl">
       <CardHeader className="space-y-1 pb-4">
         <CardTitle className="text-2xl font-semibold tracking-tight flex items-center gap-2">
-          Create an account
+          Tạo tài khoản
         </CardTitle>
         <CardDescription className="text-base">
-          Join and start managing your tasks in seconds
+          Tham gia và bắt đầu quản lý nhiệm vụ của bạn chỉ trong vài giây
         </CardDescription>
       </CardHeader>
 
@@ -58,7 +58,7 @@ export function SignUpForm() {
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="username" className="text-sm font-medium">Username</Label>
+            <Label htmlFor="username" className="text-sm font-medium">Tên người dùng</Label>
             <div className="relative">
               <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
@@ -74,11 +74,11 @@ export function SignUpForm() {
                 maxLength={20}
               />
             </div>
-            <p className="text-[11px] text-muted-foreground pl-1">3-20 characters, this will be your public name</p>
+            <p className="text-[11px] text-muted-foreground pl-1">3-20 ký tự, đây sẽ là tên công khai của bạn</p>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-sm font-medium">Email address</Label>
+            <Label htmlFor="email" className="text-sm font-medium">Địa chỉ email</Label>
             <div className="relative">
               <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
@@ -95,14 +95,14 @@ export function SignUpForm() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password" className="text-sm font-medium">Password</Label>
+            <Label htmlFor="password" className="text-sm font-medium">Mật khẩu</Label>
             <div className="relative">
               <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
                 id="password"
                 name="password"
                 type={showPassword ? 'text' : 'password'}
-                placeholder="Create a strong password"
+                placeholder="Tạo mật khẩu mạnh"
                 required
                 minLength={6}
                 disabled={isPending}
@@ -122,7 +122,7 @@ export function SignUpForm() {
                 )}
               </button>
             </div>
-            <p className="text-[11px] text-muted-foreground pl-1">Must be at least 6 characters</p>
+            <p className="text-[11px] text-muted-foreground pl-1">Phải có ít nhất 6 ký tự</p>
           </div>
         </CardContent>
 
@@ -135,20 +135,20 @@ export function SignUpForm() {
             {isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Creating account...
+                Đang tạo tài khoản...
               </>
             ) : (
               <>
                 <UserPlus className="mr-2 h-4 w-4" />
-                Create account
+                Tạo tài khoản
               </>
             )}
           </Button>
 
           <div className="text-center text-sm text-muted-foreground">
-            Already have an account?{' '}
+            Đã có tài khoản?{' '}
             <a href="/sign-in" className="font-medium text-primary underline-offset-4 hover:underline">
-              Sign in instead
+              Đăng nhập thay vào đó
             </a>
           </div>
         </CardFooter>

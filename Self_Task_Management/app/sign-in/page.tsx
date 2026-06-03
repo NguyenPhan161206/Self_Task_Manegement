@@ -17,10 +17,10 @@ export default function SignInPage() {
 
           <div className="max-w-md">
             <h1 className="text-4xl font-semibold tracking-tight mb-4">
-              Welcome back.<br />Let&apos;s get things done.
+              Chào mừng trở lại.<br />Hãy hoàn thành công việc.
             </h1>
             <p className="text-lg text-muted-foreground">
-              Sign in to manage your tasks, track progress, and stay productive.
+              Đăng nhập để quản lý nhiệm vụ, theo dõi tiến độ và duy trì năng suất.
             </p>
           </div>
         </div>
@@ -51,7 +51,7 @@ export default function SignInPage() {
               </div>
               <span className="font-semibold text-xl">Self Task</span>
             </div>
-            <h1 className="text-2xl font-semibold tracking-tight">Welcome back</h1>
+            <h1 className="text-2xl font-semibold tracking-tight">Chào mừng trở lại</h1>
           </div>
 
           <SignInForm />

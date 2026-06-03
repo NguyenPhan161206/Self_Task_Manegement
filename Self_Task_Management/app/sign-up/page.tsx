@@ -17,10 +17,10 @@ export default function SignUpPage() {
 
           <div className="max-w-md">
             <h1 className="text-4xl font-semibold tracking-tight mb-4">
-              Start organizing.<br />Stay on top of everything.
+              Bắt đầu tổ chức.<br />Kiểm soát mọi thứ.
             </h1>
             <p className="text-lg text-muted-foreground">
-              Create your free account and take control of your tasks today.
+              Tạo tài khoản miễn phí và nắm quyền kiểm soát nhiệm vụ của bạn ngay hôm nay.
             </p>
           </div>
         </div>
@@ -51,7 +51,7 @@ export default function SignUpPage() {
               </div>
               <span className="font-semibold text-xl">Self Task</span>
             </div>
-            <h1 className="text-2xl font-semibold tracking-tight">Create your account</h1>
+            <h1 className="text-2xl font-semibold tracking-tight">Tạo tài khoản của bạn</h1>
           </div>
 
           <SignUpForm />

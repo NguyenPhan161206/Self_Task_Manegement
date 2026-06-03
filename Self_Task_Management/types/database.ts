@@ -49,8 +49,39 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
-      // Add profiles, projects etc. as your DB grows
+      user: {
+        Row: {
+          id: string
+          email: string
+          username: string
+          password_hash: string
+          avatar_url: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          email: string
+          username: string
+          password_hash: string
+          avatar_url?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          email?: string
+          username?: string
+          password_hash?: string
+          avatar_url?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      // Add projects, etc. as your DB grows
     }
     Views: {
       [_ in never]: never

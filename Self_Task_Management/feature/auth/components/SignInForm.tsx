@@ -26,13 +26,13 @@ export function SignInForm() {
       const result = await signInWithPassword(formData)
 
       if (result.success) {
-        toast.success('Welcome back!', {
-          description: 'You have successfully signed in.',
+        toast.success('Chào mừng trở lại!', {
+          description: 'Bạn đã đăng nhập thành công.',
         })
         router.push('/')
         router.refresh()
       } else {
-        setError(result.error || 'Sign in failed')
+        setError(result.error || 'Đăng nhập thất bại')
       }
     })
   }
@@ -40,9 +40,9 @@ export function SignInForm() {
   return (
     <Card className="w-full max-w-md border-border/60 shadow-xl">
       <CardHeader className="space-y-1 pb-4">
-        <CardTitle className="text-2xl font-semibold tracking-tight">Sign in</CardTitle>
+        <CardTitle className="text-2xl font-semibold tracking-tight">Đăng nhập</CardTitle>
         <CardDescription className="text-base">
-          Enter your credentials to continue
+          Nhập thông tin đăng nhập để tiếp tục
         </CardDescription>
       </CardHeader>
 
@@ -55,7 +55,7 @@ export function SignInForm() {
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-sm font-medium">Email address</Label>
+            <Label htmlFor="email" className="text-sm font-medium">Địa chỉ email</Label>
             <div className="relative">
               <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
@@ -72,10 +72,10 @@ export function SignInForm() {
           </div>
 
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="password" className="text-sm font-medium">Password</Label>
-              <a href="#" className="text-xs text-muted-foreground hover:text-foreground underline-offset-4 hover:underline">
-                Forgot password?
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+              <Label htmlFor="password" className="text-sm font-medium">Mật khẩu</Label>
+              <a href="#" className="text-xs text-muted-foreground hover:text-foreground underline-offset-4 hover:underline self-start sm:self-auto">
+                Quên mật khẩu?
               </a>
             </div>
             <div className="relative">
@@ -84,7 +84,7 @@ export function SignInForm() {
                 id="password"
                 name="password"
                 type={showPassword ? 'text' : 'password'}
-                placeholder="Enter your password"
+                placeholder="Nhập mật khẩu của bạn"
                 required
                 disabled={isPending}
                 autoComplete="current-password"
@@ -115,17 +115,17 @@ export function SignInForm() {
             {isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Signing in...
+                Đang đăng nhập...
               </>
             ) : (
-              'Sign in'
+              'Đăng nhập'
             )}
           </Button>
 
           <div className="text-center text-sm text-muted-foreground">
-            Don&apos;t have an account?{' '}
+            Chưa có tài khoản?{' '}
             <a href="/sign-up" className="font-medium text-primary underline-offset-4 hover:underline">
-              Create one
+              Tạo một cái
             </a>
           </div>
         </CardFooter>

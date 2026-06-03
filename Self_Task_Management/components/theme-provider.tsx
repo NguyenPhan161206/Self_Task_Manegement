@@ -1,40 +1,17 @@
 "use client"
 
 import * as React from "react"
-import { ThemeProvider as NextThemesProvider, useTheme } from "next-themes"
+import { useTheme } from "@wrksz/themes/client"
 
-function ThemeProvider({
-  children,
-  ...props
-}: React.ComponentProps<typeof NextThemesProvider>) {
-  return (
-    <NextThemesProvider
-      attribute="class"
-      defaultTheme="system"
-      enableSystem
-      disableTransitionOnChange
-      {...props}
-    >
-      <ThemeHotkey />
-      {children}
-    </NextThemesProvider>
-  )
-}
-
-function isTypingTarget(target: EventTarget | null) {
-  if (!(target instanceof HTMLElement)) {
-    return false
-  }
-
-  return (
-    target.isContentEditable ||
-    target.tagName === "INPUT" ||
-    target.tagName === "TEXTAREA" ||
-    target.tagName === "SELECT"
-  )
-}
-
-function ThemeHotkey() {
+/**
+ * Client-only component that adds a 'd' keyboard shortcut to toggle between
+ * light and dark themes. This must be rendered inside a ThemeProvider.
+ *
+ * We keep it separate so the main ThemeProvider (from @wrksz/themes/next)
+ * can be used as an async Server Component in the root layout. This avoids
+ * the "script tag inside React component" warning in Next.js 16 + React 19.
+ */
+export function ThemeHotkey() {
   const { resolvedTheme, setTheme } = useTheme()
   const themeRef = React.useRef(resolvedTheme)
 
@@ -45,6 +22,19 @@ function ThemeHotkey() {
   }, [resolvedTheme])
 
   React.useEffect(() => {
+    function isTypingTarget(target: EventTarget | null) {
+      if (!(target instanceof HTMLElement)) {
+        return false
+      }
+
+      return (
+        target.isContentEditable ||
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.tagName === "SELECT"
+      )
+    }
+
     function onKeyDown(event: KeyboardEvent) {
       if (event.defaultPrevented || event.repeat) {
         return
@@ -74,9 +64,7 @@ function ThemeHotkey() {
     return () => {
       window.removeEventListener("keydown", onKeyDown)
     }
-  }, [setTheme]) // setTheme from next-themes is stable
+  }, [setTheme]) // setTheme from @wrksz/themes is stable
 
   return null
 }
-
-export { ThemeProvider }

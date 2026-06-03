@@ -8,6 +8,7 @@ A personal task management app. Built to be **easy to scale**, **safe**, and **e
 - Bare template running (`npm run dev` works).
 - Supabase connected via `.env` (keys present, client + admin patterns ready).
 - Theme (dark/light + `d` hotkey) + one example accordion.
+- **Home is now a beautiful fanpage-style landing page** — fully driven by `data/home.json`. Edit text, CTAs, testimonials, and image URLs there for instant changes. Images use `next/image` + picsum placeholders (replace paths in JSON with your own in `public/images/`).
 - **No real tasks/auth code yet** — the folder structure below is prepared so the first real features can be added cleanly.
 
 ## Project folder structure (scalable by design)

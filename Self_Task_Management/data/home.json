@@ -1,0 +1,131 @@
+{
+  "hero": {
+    "title": "Self Task",
+    "subtitle": "Công cụ năng suất đẹp và đơn giản mà người hâm mộ không thể ngừng sử dụng.",
+    "description": "Đồng bộ thời gian thực trên mọi thiết bị. Bảo mật bởi Supabase. Không lộn xộn. Cách quản lý công việc cá nhân nên cảm thấy như vậy.",
+    "primaryCta": {
+      "text": "Tham gia cùng người hâm mộ — miễn phí",
+      "href": "/sign-up"
+    },
+    "secondaryCta": {
+      "text": "Xem nó hoạt động",
+      "href": "#demo"
+    },
+    "image": "/images/hero-productivity.jpg"
+  },
+  "stats": [
+    {
+      "value": "0",
+      "label": "Nhiệm vụ đã hoàn thành bởi người hâm mộ trong tháng này"
+    },
+    {
+      "value": "0",
+      "label": "Người hâm mộ năng suất hạnh phúc"
+    },
+    {
+      "value": "0",
+      "label": "Đánh giá trung bình từ người hâm mộ"
+    }
+  ],
+  "features": [
+    {
+      "icon": "Zap",
+      "title": "Thời gian thực mọi nơi",
+      "description": "Thay đổi đồng bộ ngay lập tức trên điện thoại, máy tính bảng và máy tính để bàn. Không cần làm mới."
+    },
+    {
+      "icon": "Shield",
+      "title": "Riêng tư & an toàn theo thiết kế",
+      "description": "Dữ liệu của bạn vẫn là của bạn. Được hỗ trợ bởi Supabase với xác thực cấp doanh nghiệp."
+    },
+    {
+      "icon": "CheckSquare",
+      "title": "Đơn giản một cách đẹp đẽ",
+      "description": "Không thừa thãi. Chỉ những công cụ bạn cần để kiểm soát những gì quan trọng."
+    },
+    {
+      "icon": "Clock",
+      "title": "Ngày đến hạn & ưu tiên thông minh",
+      "description": "Không bao giờ bỏ lỡ hạn chót. Các gợi ý trực quan và cảnh báo quá hạn giúp bạn tập trung."
+    }
+  ],
+  "testimonials": [
+    {
+      "quote": "Self Task là ứng dụng duy nhất thực sự khiến tôi thích lập kế hoạch cho ngày của mình. Cuối cùng tôi cũng cảm thấy kiểm soát được.",
+      "author": "Alex Rivera",
+      "role": "Lập trình viên độc lập & người hâm mộ năng suất",
+      "avatar": "/images/fan-alex.jpg"
+    },
+    {
+      "quote": "Sạch sẽ, nhanh chóng và thực sự thú vị khi sử dụng. Toàn bộ đội của tôi đã chuyển sang chỉ trong một tuần.",
+      "author": "Sam Chen",
+      "role": "Người sáng lập, studio 3 người",
+      "avatar": "/images/fan-sam.jpg"
+    },
+    {
+      "quote": "Đồng bộ thời gian thực thật kỳ diệu. Tôi bắt đầu một nhiệm vụ trên máy tính xách tay và hoàn thành nó trên điện thoại mà không cần nghĩ.",
+      "author": "Jordan Lee",
+      "role": "Nhà thiết kế tự do & người hâm mộ",
+      "avatar": "/images/fan-jordan.jpg"
+    }
+  ],
+  "howItWorks": [
+    {
+      "step": 1,
+      "title": "Ghi lại ngay lập tức",
+      "description": "Thêm nhiệm vụ trong vài giây với ưu tiên, ngày đến hạn và mô tả.",
+      "icon": "Plus"
+    },
+    {
+      "step": 2,
+      "title": "Giữ đồng bộ",
+      "description": "Mọi thứ cập nhật trực tiếp trên mọi thiết bị. Đội của bạn hoặc bản thân tương lai sẽ cảm ơn bạn.",
+      "icon": "Zap"
+    },
+    {
+      "step": 3,
+      "title": "Làm cho tiến độ hiển thị",
+      "description": "Kéo, hoàn thành, lọc. Xem chính xác bạn đang ở đâu chỉ trong nháy mắt.",
+      "icon": "BarChart3"
+    }
+  ],
+  "demo": {
+    "title": "Xem nó hoạt động",
+    "description": "Một trải nghiệm trực tiếp về trải nghiệm nhiệm vụ đẹp mà người hâm mộ yêu thích.",
+    "tasks": [
+      {
+        "id": "demo-1",
+        "title": "Phát hành trang fanpage đích mới",
+        "description": "Làm cho trang chủ cảm giác như một trang fan chính thức cho Self Task",
+        "status": "in_progress",
+        "priority": "high"
+      },
+      {
+        "id": "demo-2",
+        "title": "Viết đánh giá hàng tuần",
+        "description": "",
+        "status": "todo",
+        "priority": "medium"
+      },
+      {
+        "id": "demo-3",
+        "title": "Chuẩn bị bài thuyết trình cho khách hàng",
+        "description": "Bao gồm slide số liệu năng suất mới",
+        "status": "done",
+        "priority": "high"
+      }
+    ]
+  },
+  "finalCta": {
+    "title": "Sẵn sàng trở thành người hâm mộ?",
+    "description": "Tham gia cùng hàng nghìn người cuối cùng cũng thích quản lý công việc của họ.",
+    "primaryCta": {
+      "text": "Bắt đầu miễn phí",
+      "href": "/sign-up"
+    },
+    "secondaryCta": {
+      "text": "Đăng nhập",
+      "href": "/sign-in"
+    }
+  }
+}

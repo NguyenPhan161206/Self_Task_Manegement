@@ -23,7 +23,7 @@ export async function signInWithPassword(formData: FormData) {
   if (error) {
     return {
       success: false,
-      error: error.message || 'Invalid login credentials',
+      error: error.message || 'Thông tin đăng nhập không hợp lệ',
     }
   }
 
@@ -35,38 +35,99 @@ export async function signInWithPassword(formData: FormData) {
 
 /**
  * Server Action: Sign up new user (username + email + password).
- * The username is stored in user_metadata so it can be accessed via user.user_metadata.username
+ *
+ * Flow (DB-first, then Auth):
+ *  1. Validate inputs
+ *  2. Hash password (scrypt — Node.js built-in, no extra deps)
+ *  3. INSERT into public."user" (email, username, password_hash)
+ *  4. Only if ③ succeeds → create Supabase Auth user with the SAME UUID
+ *  5. If Auth creation fails → rollback the user row
+ *
+ * This guarantees we never have an orphaned Auth user without a DB user.
  */
 export async function signUp(formData: FormData) {
-  const supabase = await createClient()
-
   const username = (formData.get('username') as string || '').trim()
-  const email = formData.get('email') as string
+  const email = (formData.get('email') as string || '').trim().toLowerCase()
   const password = formData.get('password') as string
 
-  if (!username) {
+  // ── Validation ──────────────────────────────────────────────
+  if (!username || username.length < 3 || username.length > 20) {
     return {
       success: false,
-      error: 'Username is required',
+      error: 'Tên người dùng phải từ 3 đến 20 ký tự.',
     }
   }
 
-  const { error } = await supabase.auth.signUp({
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return {
+      success: false,
+      error: 'Địa chỉ email không hợp lệ.',
+    }
+  }
+
+  if (!password || password.length < 6) {
+    return {
+      success: false,
+      error: 'Mật khẩu phải có ít nhất 6 ký tự.',
+    }
+  }
+
+  // ── Step 1: Hash password ───────────────────────────────────
+  const { hashPassword } = await import('./lib/password')
+  const passwordHash = await hashPassword(password)
+
+  // ── Step 2: Generate shared UUID for DB user + auth user ───
+  const userId = crypto.randomUUID()
+
+  // ── Step 3: INSERT into user table (DB-first) ──────────
+  const { supabaseAdmin } = await import('@/lib/supabase/server')
+
+  // Giả định bảng của bạn tên là 'user' và có các cột id, email, username, password_hash
+  // Nếu cột mật khẩu của bạn tên là 'password', hãy đổi 'password_hash' thành 'password'
+  const { error: dbError } = await supabaseAdmin
+    .from('user')
+    .insert({
+      id: userId,
+      email,
+      username,
+      password_hash: passwordHash,
+    })
+
+  if (dbError) {
+    // Handle unique constraint violations (Postgres error code 23505)
+    if (dbError.code === '23505') {
+      if (dbError.message?.includes('email')) {
+        return { success: false, error: 'Email này đã được sử dụng.' }
+      }
+      if (dbError.message?.includes('username')) {
+        return { success: false, error: 'Tên người dùng này đã được sử dụng.' }
+      }
+      return { success: false, error: 'Email hoặc tên người dùng đã tồn tại.' }
+    }
+    return {
+      success: false,
+      error: dbError.message || 'Không thể tạo hồ sơ người dùng trong database.',
+    }
+  }
+
+  // ── Step 4: Create Auth user (only after DB success) ───────
+  const { error: authError } = await supabaseAdmin.auth.admin.createUser({
+    id: userId, // same UUID so user.id === auth.users.id
     email,
     password,
-    options: {
-      data: {
-        username,
-      },
-      // You can add emailRedirectTo here for confirmation emails
-      // emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+    email_confirm: true, // skip email confirmation for now
+    user_metadata: {
+      username,
     },
   })
 
-  if (error) {
+  if (authError) {
+    // ── Rollback: remove the user we just inserted ────────
+    await supabaseAdmin.from('user').delete().eq('id', userId)
+
     return {
       success: false,
-      error: error.message || 'Could not create account',
+      error: authError.message || 'Không thể tạo tài khoản xác thực.',
     }
   }
 
@@ -74,7 +135,7 @@ export async function signUp(formData: FormData) {
 
   return {
     success: true,
-    message: 'Account created. Check your email for confirmation if required.',
+    message: 'Tài khoản đã được tạo thành công! Bạn có thể đăng nhập ngay.',
   }
 }
 

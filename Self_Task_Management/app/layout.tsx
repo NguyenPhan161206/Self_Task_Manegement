@@ -1,7 +1,8 @@
 import { Geist_Mono, Inter } from "next/font/google"
 
 import "./globals.css"
-import { ThemeProvider } from "@/components/theme-provider"
+import { ThemeProvider } from "@wrksz/themes/next"
+import { ThemeHotkey } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
 import { AppHeader } from "@/components/app-header"
 import { cn } from "@/lib/utils";
@@ -13,7 +14,7 @@ const fontMono = Geist_Mono({
   variable: "--font-mono",
 })
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
@@ -25,7 +26,13 @@ export default function RootLayout({
       className={cn("antialiased", fontMono.variable, "font-sans", inter.variable)}
     >
       <body>
-        <ThemeProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <ThemeHotkey />
           <AppHeader />
           <main>{children}</main>
           <Toaster richColors closeButton position="top-center" />

@@ -23,7 +23,7 @@ export function AppHeader() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 items-center px-4">
+      <div className="container flex h-14 items-center">
         <div className="flex items-center gap-2 mr-6">
           <Link href="/" className="flex items-center gap-2 font-semibold">
             <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
@@ -33,12 +33,12 @@ export function AppHeader() {
           </Link>
         </div>
 
-        <nav className="flex items-center gap-4 text-sm font-medium flex-1">
+        <nav className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm font-medium flex-1">
           <Link href="/" className="text-foreground/60 hover:text-foreground transition-colors">
-            Home
+            Trang chủ
           </Link>
           <Link href="/sign-in" className="text-foreground/60 hover:text-foreground transition-colors">
-            Tasks
+            Nhiệm vụ
           </Link>
         </nav>
 
@@ -68,10 +68,10 @@ export function AppHeader() {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href="/">Dashboard</Link>
+                  <Link href="/">Bảng điều khiển</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href="/sign-in">My Tasks</Link>
+                  <Link href="/sign-in">Nhiệm vụ của tôi</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
@@ -79,17 +79,17 @@ export function AppHeader() {
                   className="text-destructive focus:text-destructive"
                 >
                   <LogOut className="mr-2 h-4 w-4" />
-                  Sign out
+                  Đăng xuất
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <div className="flex items-center gap-2">
-              <Button asChild variant="ghost" size="sm">
-                <Link href="/sign-in">Sign in</Link>
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <Button asChild variant="ghost" size="sm" className="px-2 text-xs sm:px-2.5 sm:text-sm">
+                <Link href="/sign-in">Đăng nhập</Link>
               </Button>
-              <Button asChild size="sm">
-                <Link href="/sign-up">Get started</Link>
+              <Button asChild size="sm" className="px-2 text-xs sm:px-2.5 sm:text-sm">
+                <Link href="/sign-up">Bắt đầu</Link>
               </Button>
             </div>
           )}
