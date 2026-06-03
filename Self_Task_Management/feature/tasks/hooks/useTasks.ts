@@ -40,10 +40,10 @@ export function useTasks(filter: TaskFilter = {}) {
         return
       }
 
-      // Query tasks via personal_tasks
+      // Query tasks via personal_tasks with nested task_tags
       let query = supabase
         .from('personal_tasks')
-        .select('task_id, tasks(*)')
+        .select('task_id, tasks(*, task_tags(tags(id, name)))')
         .eq('user_id', userRow.id)
 
       if (filter.status && filter.status !== 'all') {
@@ -61,9 +61,17 @@ export function useTasks(filter: TaskFilter = {}) {
         return
       }
 
-      let result: Task[] = (data || [])
-        .map(item => (item.tasks as Task | null))
-        .filter((t): t is Task => t !== null)
+      let result: TaskWithMeta[] = (data || [])
+        .map(item => {
+          const task = item.tasks as TaskWithMeta | null
+          if (task) {
+            task.taskTags = (task as any).task_tags ?? []
+            delete (task as any).task_tags
+          }
+          return task
+        })
+        .filter((t): t is TaskWithMeta => t !== null)
+        .map(enrichTask)
 
       // Client-side search filter
       if (filter.search) {
@@ -71,13 +79,20 @@ export function useTasks(filter: TaskFilter = {}) {
         result = result.filter(t => t.title.toLowerCase().includes(q))
       }
 
-      setTasks(result.map(enrichTask))
+      // Client-side tag filter
+      if (filter.tag && filter.tag !== 'all') {
+        result = result.filter(t =>
+          t.taskTags?.some(tt => tt.tags?.name === filter.tag)
+        )
+      }
+
+      setTasks(result)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Lỗi khi tải nhiệm vụ')
     } finally {
       setIsLoading(false)
     }
-  }, [filter.status, filter.priority, filter.search])
+  }, [filter.status, filter.priority, filter.search, filter.tag])
 
   useTaskSubscription(fetchTasks)
 

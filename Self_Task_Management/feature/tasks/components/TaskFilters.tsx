@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { TASK_STATUSES, TASK_PRIORITIES } from '../types'
 import type { TaskStatus, TaskPriority } from '../types'
+import type { Tag } from '@/feature/tags/types'
 
 interface TaskFiltersProps {
   search: string
@@ -14,6 +15,9 @@ interface TaskFiltersProps {
   onStatusChange: (value: TaskStatus | 'all') => void
   priorityFilter: TaskPriority | 'all'
   onPriorityChange: (value: TaskPriority | 'all') => void
+  tagFilter?: string
+  onTagChange?: (value: string) => void
+  availableTags?: Tag[]
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -37,6 +41,9 @@ export function TaskFilters({
   onStatusChange,
   priorityFilter,
   onPriorityChange,
+  tagFilter = 'all',
+  onTagChange,
+  availableTags = [],
 }: TaskFiltersProps) {
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -50,7 +57,7 @@ export function TaskFilters({
         />
       </div>
 
-      <div className="flex flex-wrap gap-1.5">
+      <div className="flex flex-wrap items-center gap-1.5">
         <div className="flex flex-wrap gap-1">
           {(['all', ...TASK_STATUSES] as const).map(s => (
             <Button
@@ -76,6 +83,21 @@ export function TaskFilters({
             </Button>
           ))}
         </div>
+
+        {availableTags.length > 0 && onTagChange && (
+          <div className="flex gap-1">
+            {[{ name: 'all' } as Tag, ...availableTags].map(tag => (
+              <Button
+                key={tag.name}
+                variant={tagFilter === tag.name ? 'default' : 'outline'}
+                size="xs"
+                onClick={() => onTagChange(tag.name)}
+              >
+                {tag.name === 'all' ? 'Tất cả' : tag.name}
+              </Button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )

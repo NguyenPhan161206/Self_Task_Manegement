@@ -13,9 +13,10 @@ interface KanbanColumnProps {
   title: string
   tasks: TaskWithMeta[]
   onStatusChange?: (id: number, status: TaskStatus) => void
+  onEditTask?: (task: TaskWithMeta) => void
 }
 
-function SortableTaskCard({ task, onStatusChange }: { task: TaskWithMeta; onStatusChange?: (id: number, status: TaskStatus) => void }) {
+function SortableTaskCard({ task, onStatusChange, onEditTask }: { task: TaskWithMeta; onStatusChange?: (id: number, status: TaskStatus) => void; onEditTask?: (task: TaskWithMeta) => void }) {
   const {
     attributes,
     listeners,
@@ -38,13 +39,14 @@ function SortableTaskCard({ task, onStatusChange }: { task: TaskWithMeta; onStat
       <TaskCard
         task={task}
         onStatusChange={onStatusChange}
+        onEdit={onEditTask}
         className={cn(isDragging && 'opacity-50 shadow-lg', 'cursor-grab active:cursor-grabbing')}
       />
     </div>
   )
 }
 
-export function KanbanColumn({ status, title, tasks, onStatusChange }: KanbanColumnProps) {
+export function KanbanColumn({ status, title, tasks, onStatusChange, onEditTask }: KanbanColumnProps) {
   const { setNodeRef, isOver } = useDroppable({ id: status })
 
   return (
@@ -73,6 +75,7 @@ export function KanbanColumn({ status, title, tasks, onStatusChange }: KanbanCol
               key={task.id}
               task={task}
               onStatusChange={onStatusChange}
+              onEditTask={onEditTask}
             />
           ))
         )}

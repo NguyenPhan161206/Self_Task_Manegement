@@ -24,6 +24,7 @@ import { KanbanColumn } from './KanbanColumn'
 interface KanbanBoardProps {
   tasks: TaskWithMeta[]
   onTasksChange?: (tasks: TaskWithMeta[]) => void
+  onEditTask?: (task: TaskWithMeta) => void
 }
 
 const COLUMN_LABELS: Record<TaskStatus, string> = {
@@ -32,7 +33,7 @@ const COLUMN_LABELS: Record<TaskStatus, string> = {
   done: 'Hoàn thành',
 }
 
-export function KanbanBoard({ tasks, onTasksChange }: KanbanBoardProps) {
+export function KanbanBoard({ tasks, onTasksChange, onEditTask }: KanbanBoardProps) {
   const [activeTask, setActiveTask] = useState<TaskWithMeta | null>(null)
   const grouped = groupTasksByStatus(tasks)
 
@@ -111,6 +112,7 @@ export function KanbanBoard({ tasks, onTasksChange }: KanbanBoardProps) {
             status={status}
             title={COLUMN_LABELS[status]}
             tasks={grouped[status]}
+            onEditTask={onEditTask}
           />
         ))}
       </div>

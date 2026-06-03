@@ -36,11 +36,3 @@ export function groupTasksByStatus(tasks: Task[]): Record<TaskStatus, TaskWithMe
   }
   return groups
 }
-
-export function filterTasks(tasks: Task[], filter: { search?: string; status?: TaskStatus | 'all' }): Task[] {
-  return tasks.filter(t => {
-    const matchesSearch = !filter.search || t.title.toLowerCase().includes(filter.search.toLowerCase())
-    const matchesStatus = !filter.status || filter.status === 'all' || t.status === filter.status
-    return matchesSearch && matchesStatus
-  })
-}

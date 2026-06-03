@@ -1,8 +1,5 @@
-// Public entry point for the tasks feature
-//   import { KanbanBoard, useTasks, createTask } from '@/feature/tasks'
-
 export * from './types'
-export * from './utils'
+export { isOverdue, getDaysUntilDue, enrichTask, groupTasksByStatus } from './utils'
 export * from './actions'
 
 export { TaskCard, TaskForm, TaskFilters, TaskEmpty, KanbanColumn, KanbanBoard } from './components'

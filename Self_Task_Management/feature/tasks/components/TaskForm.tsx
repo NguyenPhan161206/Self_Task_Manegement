@@ -8,25 +8,37 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { SelectRoot, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
 import { TASK_STATUSES, TASK_PRIORITIES } from '../types'
+import type { TaskWithMeta } from '../types'
 import { createTask } from '../actions'
+import { updateTaskFromForm } from '../actions'
+import { useTags } from '@/feature/tags/hooks/useTags'
+import { TagSelector } from '@/feature/tags/components/TagSelector'
 
 interface TaskFormProps {
   onSuccess?: () => void
+  task?: TaskWithMeta
 }
 
-export function TaskForm({ onSuccess }: TaskFormProps) {
+export function TaskForm({ onSuccess, task }: TaskFormProps) {
+  const { tags } = useTags()
+  const [selectedTagIds, setSelectedTagIds] = useState<number[]>(
+    () => task?.taskTags?.map(tt => tt.tags?.id).filter((id): id is number => id != null) ?? []
+  )
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
+  const isEdit = !!task
 
   async function handleSubmit(formData: FormData) {
     setError(null)
 
     startTransition(async () => {
-      const result = await createTask(formData)
+      const result = isEdit
+        ? await updateTaskFromForm(task.id, formData)
+        : await createTask(formData)
       if (result.success) {
         onSuccess?.()
       } else {
-        setError(result.error || 'Tạo nhiệm vụ thất bại')
+        setError(result.error || (isEdit ? 'Cập nhật thất bại' : 'Tạo nhiệm vụ thất bại'))
       }
     })
   }
@@ -44,6 +56,7 @@ export function TaskForm({ onSuccess }: TaskFormProps) {
         <Input
           id="title"
           name="title"
+          defaultValue={task?.title}
           placeholder="Nhập tiêu đề nhiệm vụ"
           required
           disabled={isPending}
@@ -55,6 +68,7 @@ export function TaskForm({ onSuccess }: TaskFormProps) {
         <Input
           id="description"
           name="description"
+          defaultValue={task?.description ?? ''}
           placeholder="Mô tả chi tiết (không bắt buộc)"
           disabled={isPending}
         />
@@ -63,7 +77,7 @@ export function TaskForm({ onSuccess }: TaskFormProps) {
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="status">Trạng thái</Label>
-          <SelectRoot name="status" defaultValue="todo">
+          <SelectRoot name="status" defaultValue={task?.status || 'todo'}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
@@ -79,7 +93,7 @@ export function TaskForm({ onSuccess }: TaskFormProps) {
 
         <div className="space-y-2">
           <Label htmlFor="priority">Ưu tiên</Label>
-          <SelectRoot name="priority" defaultValue="medium">
+          <SelectRoot name="priority" defaultValue={task?.priority || 'medium'}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
@@ -94,14 +108,33 @@ export function TaskForm({ onSuccess }: TaskFormProps) {
         </div>
       </div>
 
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="start_date">Ngày bắt đầu</Label>
+          <Input
+            id="start_date"
+            name="start_date"
+            type="date"
+            defaultValue={task?.start_date ?? ''}
+            disabled={isPending}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="due_date">Hạn chót</Label>
+          <Input
+            id="due_date"
+            name="due_date"
+            type="date"
+            defaultValue={task?.due_date ?? ''}
+            disabled={isPending}
+          />
+        </div>
+      </div>
+
       <div className="space-y-2">
-        <Label htmlFor="due_date">Hạn chót</Label>
-        <Input
-          id="due_date"
-          name="due_date"
-          type="date"
-          disabled={isPending}
-        />
+        <Label>Thẻ tag</Label>
+        <TagSelector tags={tags} selectedTagIds={selectedTagIds} onChange={setSelectedTagIds} disabled={isPending} />
+        <input type="hidden" name="tag_ids" value={JSON.stringify(selectedTagIds)} />
       </div>
 
       <div className="flex justify-end gap-2 pt-2">
@@ -109,10 +142,10 @@ export function TaskForm({ onSuccess }: TaskFormProps) {
           {isPending ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Đang tạo...
+              {isEdit ? 'Đang lưu...' : 'Đang tạo...'}
             </>
           ) : (
-            'Tạo nhiệm vụ'
+            isEdit ? 'Lưu thay đổi' : 'Tạo nhiệm vụ'
           )}
         </Button>
       </div>

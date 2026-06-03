@@ -21,6 +21,11 @@ export function useTaskSubscription(onChange: () => void) {
         { event: '*', schema: 'public', table: 'tasks' },
         () => callbackRef.current(),
       )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'task_tags' },
+        () => callbackRef.current(),
+      )
       .subscribe()
 
     return () => {
