@@ -451,6 +451,7 @@ export type Database = {
         Row: {
           attachments: string | null
           completed_date: string | null
+          created_at: string | null
           creator_id: number | null
           description: string | null
           due_date: string | null
@@ -466,6 +467,7 @@ export type Database = {
         Insert: {
           attachments?: string | null
           completed_date?: string | null
+          created_at?: string | null
           creator_id?: number | null
           description?: string | null
           due_date?: string | null
@@ -481,6 +483,7 @@ export type Database = {
         Update: {
           attachments?: string | null
           completed_date?: string | null
+          created_at?: string | null
           creator_id?: number | null
           description?: string | null
           due_date?: string | null

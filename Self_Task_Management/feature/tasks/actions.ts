@@ -41,6 +41,7 @@ export async function createTask(formData: FormData) {
       due_date: dueDate,
       start_date: startDate || todayStr(),
       completed_date: status === 'done' ? todayStr() : null,
+      created_at: todayStr(),
       creator_id: creatorId,
       last_updated_by: creatorId,
     })

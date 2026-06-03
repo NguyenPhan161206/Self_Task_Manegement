@@ -16,11 +16,11 @@ export async function getTasks(filter?: TaskFilter): Promise<Task[]> {
     .select('task_id, tasks(*)')
     .eq('user_id', userId)
 
-  if (filter?.status && filter.status !== 'all') {
-    query = query.eq('tasks.status', filter.status)
+  if (filter?.statuses && filter.statuses.length > 0) {
+    query = query.in('tasks.status', filter.statuses)
   }
-  if (filter?.priority && filter.priority !== 'all') {
-    query = query.eq('tasks.priority', filter.priority)
+  if (filter?.priorities && filter.priorities.length > 0) {
+    query = query.in('tasks.priority', filter.priorities)
   }
 
   const { data, error } = await query

@@ -1,5 +1,6 @@
 'use client'
 
+import { memo } from 'react'
 import { useDroppable } from '@dnd-kit/core'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
@@ -46,7 +47,7 @@ function SortableTaskCard({ task, onStatusChange, onEditTask }: { task: TaskWith
   )
 }
 
-export function KanbanColumn({ status, title, tasks, onStatusChange, onEditTask }: KanbanColumnProps) {
+function KanbanColumnInner({ status, title, tasks, onStatusChange, onEditTask }: KanbanColumnProps) {
   const { setNodeRef, isOver } = useDroppable({ id: status })
 
   return (
@@ -83,3 +84,5 @@ export function KanbanColumn({ status, title, tasks, onStatusChange, onEditTask 
     </div>
   )
 }
+
+export const KanbanColumn = memo(KanbanColumnInner)

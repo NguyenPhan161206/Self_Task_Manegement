@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo, useCallback, memo } from 'react'
 import {
   DndContext,
   DragOverlay,
@@ -33,21 +33,21 @@ const COLUMN_LABELS: Record<TaskStatus, string> = {
   done: 'Hoàn thành',
 }
 
-export function KanbanBoard({ tasks, onTasksChange, onEditTask }: KanbanBoardProps) {
+function KanbanBoardInner({ tasks, onTasksChange, onEditTask }: KanbanBoardProps) {
   const [activeTask, setActiveTask] = useState<TaskWithMeta | null>(null)
-  const grouped = groupTasksByStatus(tasks)
+  const grouped = useMemo(() => groupTasksByStatus(tasks), [tasks])
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor)
   )
 
-  function handleDragStart(event: DragStartEvent) {
+  const handleDragStart = useCallback((event: DragStartEvent) => {
     const task = tasks.find(t => t.id === event.active.id)
     if (task) setActiveTask(task)
-  }
+  }, [tasks])
 
-  async function handleDragEnd(event: DragEndEvent) {
+  const handleDragEnd = useCallback(async (event: DragEndEvent) => {
     setActiveTask(null)
 
     const { active, over } = event
@@ -96,7 +96,7 @@ export function KanbanBoard({ tasks, onTasksChange, onEditTask }: KanbanBoardPro
         onTasksChange(updated)
       }
     }
-  }
+  }, [tasks, grouped, onTasksChange])
 
   return (
     <DndContext
@@ -127,3 +127,5 @@ export function KanbanBoard({ tasks, onTasksChange, onEditTask }: KanbanBoardPro
     </DndContext>
   )
 }
+
+export const KanbanBoard = memo(KanbanBoardInner)

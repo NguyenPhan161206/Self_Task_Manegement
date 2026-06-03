@@ -1,5 +1,6 @@
 'use client'
 
+import { memo } from 'react'
 import { Pencil } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
@@ -38,7 +39,7 @@ const PRIORITY_LABELS: Record<string, string> = {
   high: 'Cao',
 }
 
-export function TaskCard({ task, onStatusChange, onEdit, className }: TaskCardProps) {
+function TaskCardInner({ task, onStatusChange, onEdit, className }: TaskCardProps) {
   const overdue = isOverdue(task)
   const taskTags = task.taskTags?.map(tt => tt.tags?.name).filter((n): n is string => n != null) ?? []
 
@@ -114,3 +115,5 @@ export function TaskCard({ task, onStatusChange, onEdit, className }: TaskCardPr
     </div>
   )
 }
+
+export const TaskCard = memo(TaskCardInner)

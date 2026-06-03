@@ -9,11 +9,10 @@ import { useTaskSubscription } from './useTaskSubscription'
 
 export function useTasks(filter: TaskFilter = {}) {
   const [tasks, setTasks] = useState<TaskWithMeta[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [isInitialLoading, setInitialLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   const fetchTasks = useCallback(async () => {
-    setIsLoading(true)
     setError(null)
 
     try {
@@ -23,7 +22,7 @@ export function useTasks(filter: TaskFilter = {}) {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         setTasks([])
-        setIsLoading(false)
+        setInitialLoading(false)
         return
       }
 
@@ -36,7 +35,7 @@ export function useTasks(filter: TaskFilter = {}) {
 
       if (!userRow) {
         setTasks([])
-        setIsLoading(false)
+        setInitialLoading(false)
         return
       }
 
@@ -46,18 +45,18 @@ export function useTasks(filter: TaskFilter = {}) {
         .select('task_id, tasks(*, task_tags(tags(id, name)))')
         .eq('user_id', userRow.id)
 
-      if (filter.status && filter.status !== 'all') {
-        query = query.eq('tasks.status', filter.status)
+      if (filter.statuses && filter.statuses.length > 0) {
+        query = query.in('tasks.status', filter.statuses)
       }
-      if (filter.priority && filter.priority !== 'all') {
-        query = query.eq('tasks.priority', filter.priority)
+      if (filter.priorities && filter.priorities.length > 0) {
+        query = query.in('tasks.priority', filter.priorities)
       }
 
       const { data, error: queryError } = await query
 
       if (queryError) {
         setError(queryError.message)
-        setIsLoading(false)
+        setInitialLoading(false)
         return
       }
 
@@ -80,9 +79,9 @@ export function useTasks(filter: TaskFilter = {}) {
       }
 
       // Client-side tag filter
-      if (filter.tag && filter.tag !== 'all') {
+      if (filter.tags && filter.tags.length > 0) {
         result = result.filter(t =>
-          t.taskTags?.some(tt => tt.tags?.name === filter.tag)
+          t.taskTags?.some(tt => tt.tags?.name && filter.tags!.includes(tt.tags.name))
         )
       }
 
@@ -90,9 +89,9 @@ export function useTasks(filter: TaskFilter = {}) {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Lỗi khi tải nhiệm vụ')
     } finally {
-      setIsLoading(false)
+      setInitialLoading(false)
     }
-  }, [filter.status, filter.priority, filter.search, filter.tag])
+  }, [filter.statuses, filter.priorities, filter.search, filter.tags])
 
   useTaskSubscription(fetchTasks)
 
@@ -102,7 +101,7 @@ export function useTasks(filter: TaskFilter = {}) {
 
   return {
     tasks,
-    isLoading,
+    isInitialLoading,
     error,
     refetch: fetchTasks,
     setTasks,

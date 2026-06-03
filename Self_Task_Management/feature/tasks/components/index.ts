@@ -1,6 +1,6 @@
 export { TaskCard } from './TaskCard'
 export { TaskForm } from './TaskForm'
-export { TaskFilters } from './TaskFilters'
 export { TaskEmpty } from './TaskEmpty'
+export { FilterPanel } from './FilterPanel'
 export { KanbanColumn } from './KanbanColumn'
 export { KanbanBoard } from './KanbanBoard'

@@ -218,6 +218,7 @@ export default function FanpageHome() {
                     due_date: null,
                     start_date: null,
                     completed_date: null,
+                    created_at: null,
                     tags: null,
                     attachments: null,
                     creator_id: null,

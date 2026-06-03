@@ -9,10 +9,10 @@ export type TaskStatus = 'todo' | 'in_progress' | 'done'
 export type TaskPriority = 'low' | 'medium' | 'high'
 
 export interface TaskFilter {
-  status?: TaskStatus | 'all'
-  priority?: TaskPriority | 'all'
   search?: string
-  tag?: string
+  statuses?: TaskStatus[]
+  priorities?: TaskPriority[]
+  tags?: string[]
 }
 
 export const TASK_STATUSES: TaskStatus[] = ['todo', 'in_progress', 'done']

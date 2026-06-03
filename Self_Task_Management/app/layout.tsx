@@ -5,6 +5,7 @@ import { ThemeProvider } from "@wrksz/themes/next"
 import { ThemeHotkey } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
 import { AppHeader } from "@/components/app-header"
+import { AppSidebar } from "@/components/app-sidebar"
 import { cn } from "@/lib/utils";
 
 const inter = Inter({subsets:['latin'],variable:'--font-sans'})
@@ -33,8 +34,13 @@ export default async function RootLayout({
           disableTransitionOnChange
         >
           <ThemeHotkey />
-          <AppHeader />
-          <main>{children}</main>
+          <div className="flex min-h-screen flex-col">
+            <AppHeader />
+            <div className="flex flex-1">
+              <AppSidebar />
+              <main className="flex-1">{children}</main>
+            </div>
+          </div>
           <Toaster richColors closeButton position="top-center" />
         </ThemeProvider>
       </body>

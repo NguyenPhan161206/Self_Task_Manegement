@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { CheckSquare, LogOut } from 'lucide-react'
+import { CheckSquare, Home, LogOut } from 'lucide-react'
 
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -23,23 +23,20 @@ export function AppHeader() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 items-center">
-        <div className="flex items-center gap-2 mr-6">
-          <Link href="/" className="flex items-center gap-2 font-semibold">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
-              <CheckSquare className="h-4 w-4" />
-            </div>
-            <span className="hidden sm:inline">Self Task</span>
+      <div className="flex h-14 items-center px-6">
+        <Link href="/" className="flex items-center gap-2 font-semibold">
+          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
+            <CheckSquare className="h-4 w-4" />
+          </div>
+          <span className="hidden sm:inline">Self Task</span>
           </Link>
-        </div>
 
-        <nav className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm font-medium flex-1">
-          <Link href="/" className="text-foreground/60 hover:text-foreground transition-colors">
-            Trang chủ
-          </Link>
-          <Link href="/tasks" className="text-foreground/60 hover:text-foreground transition-colors">
-            Nhiệm vụ
-          </Link>
+        <nav className="flex items-center gap-1 flex-1 justify-center">
+          <Button asChild variant="ghost" size="icon" className="h-9 w-9">
+            <Link href="/">
+              <Home className="h-4 w-4" />
+            </Link>
+          </Button>
         </nav>
 
         <div className="flex items-center gap-2">
