@@ -25,13 +25,32 @@ export async function createClient() {
               cookieStore.set(name, value, options)
             )
           } catch {
-            // The `setAll` method was called from a Server Component.
-            // This can be ignored if you have middleware refreshing user sessions.
+            // Server Component context → cannot set cookies, which is fine
+            // because refresh is handled by the Auth client internally.
           }
         },
       },
     }
   )
+}
+
+/**
+ * Clears all Supabase auth session cookies.
+ * Used in signOut when the SSR client's cookie methods may not apply
+ * properly in Server Action redirect scenarios.
+ */
+export async function clearAuthCookies() {
+  try {
+    const cookieStore = await cookies()
+    const cookiesToDelete = cookieStore
+      .getAll()
+      .filter((c) => c.name.startsWith('sb-') || c.name.startsWith('supabase-'))
+    for (const cookie of cookiesToDelete) {
+      cookieStore.set(cookie.name, '', { maxAge: 0, path: '/' })
+    }
+  } catch {
+    // Non-critical cleanup
+  }
 }
 
 // Optional: Admin client using service role (use sparingly, never expose to client)

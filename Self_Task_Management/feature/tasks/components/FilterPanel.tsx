@@ -1,7 +1,7 @@
 'use client'
 
 import { memo } from 'react'
-import { ListFilter, ListChecks, ArrowUpWideNarrow, Tags, ChevronRight } from 'lucide-react'
+import { ListFilter, ListChecks, ArrowUpWideNarrow, Tags, Users, ChevronRight } from 'lucide-react'
 
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils'
 import { TASK_STATUSES, TASK_PRIORITIES } from '../types'
 import type { TaskStatus, TaskPriority } from '../types'
 import type { Tag } from '@/feature/tags/types'
+import type { Group } from '@/feature/groups/types'
 
 interface FilterPanelProps {
   statusFilters: TaskStatus[]
@@ -22,6 +23,9 @@ interface FilterPanelProps {
   availableTags: Tag[]
   tasksLoading: boolean
   onClearAll?: () => void
+  groupFilters?: number[]
+  onGroupChange?: (groupIds: number[]) => void
+  availableGroups?: Group[]
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -112,8 +116,11 @@ function FilterPanelInner({
   availableTags,
   tasksLoading,
   onClearAll,
+  groupFilters,
+  onGroupChange,
+  availableGroups,
 }: FilterPanelProps) {
-  const anyActive = statusFilters.length > 0 || priorityFilters.length > 0 || tagFilters.length > 0
+  const anyActive = statusFilters.length > 0 || priorityFilters.length > 0 || tagFilters.length > 0 || (groupFilters?.length ?? 0) > 0
 
   return (
     <div className="space-y-1">
@@ -251,6 +258,43 @@ function FilterPanelInner({
           ))
         )}
       </FilterSection>
+
+      {/* Groups section */}
+      {availableGroups && availableGroups.length > 0 && onGroupChange && groupFilters !== undefined && (
+        <FilterSection
+          title="Nhóm"
+          icon={<Users className="h-3.5 w-3.5" />}
+          activeCount={groupFilters.length}
+        >
+          {availableGroups.map(group => (
+            <div
+              key={group.id}
+              className={cn(
+                'flex items-center gap-2.5 py-1.5 px-2 rounded-md transition-colors',
+                'hover:bg-muted/50 cursor-pointer',
+              )}
+            >
+              <span className="inline-flex items-center justify-center size-4 shrink-0 rounded-[4px] bg-muted text-[9px] font-bold text-muted-foreground">
+                G
+              </span>
+              <Checkbox
+                id={`group-${group.id}`}
+                checked={groupFilters.includes(group.id)}
+                onCheckedChange={(checked) => {
+                  if (checked) {
+                    onGroupChange([...groupFilters, group.id])
+                  } else {
+                    onGroupChange(groupFilters.filter(x => x !== group.id))
+                  }
+                }}
+              />
+              <Label htmlFor={`group-${group.id}`} className="cursor-pointer text-sm font-normal flex-1">
+                {group.name}
+              </Label>
+            </div>
+          ))}
+        </FilterSection>
+      )}
 
       {/* Bottom clear all */}
       {anyActive && onClearAll && (

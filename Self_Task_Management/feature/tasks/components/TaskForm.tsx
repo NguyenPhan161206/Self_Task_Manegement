@@ -6,21 +6,34 @@ import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { SelectRoot, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
+import {
+  SelectRoot,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@/components/ui/select'
 import { TASK_STATUSES, TASK_PRIORITIES } from '../types'
 import type { TaskWithMeta } from '../types'
 import { createTask } from '../actions'
 import { updateTaskFromForm } from '../actions'
 import { useTags } from '@/feature/tags/hooks/useTags'
 import { TagSelector } from '@/feature/tags/components/TagSelector'
+import { useGroups } from '@/feature/groups/hooks/useGroups'
+import { useGroupMembers } from '@/feature/groups/hooks/useGroupMembers'
+import type { GroupMemberWithUser } from '@/feature/groups/types'
 
 interface TaskFormProps {
   onSuccess?: () => void
   task?: TaskWithMeta
+  defaultGroupId?: number
 }
 
-export function TaskForm({ onSuccess, task }: TaskFormProps) {
+export function TaskForm({ onSuccess, task, defaultGroupId }: TaskFormProps) {
   const { tags } = useTags()
+  const { groups } = useGroups()
+  const { members } = useGroupMembers(defaultGroupId ?? null)
+  const groupMembers = members as GroupMemberWithUser[]
   const [selectedTagIds, setSelectedTagIds] = useState<number[]>(
     () => task?.taskTags?.map(tt => tt.tags?.id).filter((id): id is number => id != null) ?? []
   )
@@ -130,6 +143,57 @@ export function TaskForm({ onSuccess, task }: TaskFormProps) {
           />
         </div>
       </div>
+
+      <div className="space-y-2">
+        <Label>Nhóm</Label>
+        {defaultGroupId ? (
+          <>
+            <input type="hidden" name="group_id" value={String(defaultGroupId)} />
+            <div className="rounded-md border px-3 py-2 text-sm">
+              {groups.find(g => g.id === defaultGroupId)?.name ?? `Nhóm #${defaultGroupId}`}
+            </div>
+          </>
+        ) : (
+          <SelectRoot
+            name="group_id"
+            defaultValue={task?.group_id ? String(task.group_id) : '0'}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="0">Cá nhân</SelectItem>
+              {groups.map(g => (
+                <SelectItem key={g.id} value={String(g.id)}>
+                  {g.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </SelectRoot>
+        )}
+      </div>
+
+      {defaultGroupId && (
+        <div className="space-y-2">
+          <Label>Người thực hiện</Label>
+          <SelectRoot
+            name="assignee_id"
+            defaultValue={task?.assignee_id ? String(task.assignee_id) : '0'}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Chọn người thực hiện" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="0">Không phân công</SelectItem>
+              {groupMembers.map(m => (
+                <SelectItem key={m.user_id} value={String(m.user_id)}>
+                  {m.users?.username ?? `User #${m.user_id}`}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </SelectRoot>
+        </div>
+      )}
 
       <div className="space-y-2">
         <Label>Thẻ tag</Label>

@@ -232,6 +232,7 @@ export default async function FanpageHome() {
                     creator_id: null,
                     last_updated_by: null,
                     group_id: null,
+                    assignee_id: null,
                     isOverdue: false,
                     daysUntilDue: null,
                   }}

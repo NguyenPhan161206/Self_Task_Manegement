@@ -87,10 +87,10 @@ export function AppSidebar() {
                 active={pathname === '/tasks'}
               />
               <NavItem
-                href="#"
+                href="/groups"
                 label="Nhóm"
                 icon={Users}
-                disabled
+                active={pathname.startsWith('/groups')}
               />
             </div>
           </CollapsibleContent>

@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { getUserIdFromAuth } from '@/feature/auth/lib/getUserId'
 
-import type { Task, TaskInsert, TaskUpdate, TaskStatus, TaskPriority } from './types'
+import type { TaskUpdate, TaskStatus, TaskPriority } from './types'
 import { MAX_TAGS_PER_TASK } from './types'
 
 function todayStr(): string {
@@ -26,10 +26,15 @@ export async function createTask(formData: FormData) {
   const dueDate = (formData.get('due_date') as string) || null
   const startDate = (formData.get('start_date') as string) || null
   const tagIdsRaw = (formData.get('tag_ids') as string) || '[]'
+  const groupIdRaw = (formData.get('group_id') as string) || ''
 
   let tagIds: number[] = []
   try { tagIds = JSON.parse(tagIdsRaw) } catch { tagIds = [] }
   if (tagIds.length > MAX_TAGS_PER_TASK) return { success: false, error: `Tối đa ${MAX_TAGS_PER_TASK} thẻ.` }
+
+  const group_id = groupIdRaw ? (Number(groupIdRaw) || null) : null
+  const assigneeIdRaw = (formData.get('assignee_id') as string) || ''
+  const assignee_id = assigneeIdRaw ? (Number(assigneeIdRaw) || null) : null
 
   const { data: task, error } = await supabase
     .from('tasks')
@@ -44,16 +49,20 @@ export async function createTask(formData: FormData) {
       created_at: todayStr(),
       creator_id: creatorId,
       last_updated_by: creatorId,
+      group_id,
+      assignee_id,
     })
     .select()
     .single()
 
   if (error) return { success: false, error: error.message }
 
-  // Also link task to user via personal_tasks
-  await supabase
-    .from('personal_tasks')
-    .insert({ task_id: task.id, user_id: creatorId })
+  // Also link task to user via personal_tasks (only for personal tasks)
+  if (!group_id) {
+    await supabase
+      .from('personal_tasks')
+      .insert({ task_id: task.id, user_id: creatorId })
+  }
 
   // Link tags via task_tags
   if (tagIds.length > 0) {
@@ -81,10 +90,15 @@ export async function updateTaskFromForm(taskId: number, formData: FormData) {
   const dueDate = (formData.get('due_date') as string) || null
   const startDate = (formData.get('start_date') as string) || null
   const tagIdsRaw = (formData.get('tag_ids') as string) || '[]'
+  const groupIdRaw = (formData.get('group_id') as string) || ''
 
   let tagIds: number[] = []
   try { tagIds = JSON.parse(tagIdsRaw) } catch { tagIds = [] }
   if (tagIds.length > MAX_TAGS_PER_TASK) return { success: false, error: `Tối đa ${MAX_TAGS_PER_TASK} thẻ.` }
+
+  const group_id = groupIdRaw ? (Number(groupIdRaw) || null) : null
+  const assigneeIdRaw = (formData.get('assignee_id') as string) || ''
+  const assignee_id = assigneeIdRaw ? (Number(assigneeIdRaw) || null) : null
 
   // Fetch old task to compare status for completed_date logic
   const { data: oldTask } = await supabase
@@ -116,6 +130,8 @@ export async function updateTaskFromForm(taskId: number, formData: FormData) {
       start_date: startDate,
       completed_date: completedDate,
       last_updated_by: userId,
+      group_id,
+      assignee_id,
     })
     .eq('id', taskId)
 

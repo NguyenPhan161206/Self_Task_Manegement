@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label'
 
 import { signUp } from '../actions'
 
-export function SignUpForm() {
+export function SignUpForm({ inviteToken }: { inviteToken?: string }) {
   const [error, setError] = useState<string | null>(null)
   const [showPassword, setShowPassword] = useState(false)
   const [isPending, startTransition] = useTransition()
@@ -123,6 +123,8 @@ export function SignUpForm() {
             </div>
             <p className="text-[11px] text-muted-foreground pl-1">Phải có ít nhất 6 ký tự</p>
           </div>
+
+          {inviteToken && <input type="hidden" name="invite_token" value={inviteToken} />}
         </CardContent>
 
         <CardFooter className="flex flex-col gap-4 pt-2">
@@ -146,7 +148,7 @@ export function SignUpForm() {
 
           <div className="text-center text-sm text-muted-foreground">
             Đã có tài khoản?{' '}
-            <a href="/sign-in" className="font-medium text-primary underline-offset-4 hover:underline">
+            <a href={inviteToken ? `/sign-in?invite=${inviteToken}` : '/sign-in'} className="font-medium text-primary underline-offset-4 hover:underline">
               Đăng nhập thay vào đó
             </a>
           </div>

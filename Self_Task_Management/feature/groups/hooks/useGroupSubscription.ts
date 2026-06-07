@@ -14,7 +14,7 @@ function notifyAll() {
   listeners.forEach((ref) => ref.current())
 }
 
-export function useTaskSubscription(onChange: () => void) {
+export function useGroupSubscription(onChange: () => void) {
   const callbackRef = useRef(onChange)
   callbackRef.current = onChange
 
@@ -23,15 +23,15 @@ export function useTaskSubscription(onChange: () => void) {
 
     if (!channel) {
       channel = supabase
-        .channel('tasks-realtime')
+        .channel('groups-realtime')
         .on(
           'postgres_changes',
-          { event: '*', schema: 'public', table: 'tasks' },
+          { event: '*', schema: 'public', table: 'groups' },
           notifyAll,
         )
         .on(
           'postgres_changes',
-          { event: '*', schema: 'public', table: 'task_tags' },
+          { event: '*', schema: 'public', table: 'group_members' },
           notifyAll,
         )
         .subscribe()

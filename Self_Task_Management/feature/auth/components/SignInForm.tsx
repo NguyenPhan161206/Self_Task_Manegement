@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label'
 
 import { signInWithPassword } from '../actions'
 
-export function SignInForm() {
+export function SignInForm({ inviteToken }: { inviteToken?: string }) {
   const [error, setError] = useState<string | null>(null)
   const [showPassword, setShowPassword] = useState(false)
   const [isPending, startTransition] = useTransition()
@@ -29,7 +29,11 @@ export function SignInForm() {
         toast.success('Chào mừng trở lại!', {
           description: 'Bạn đã đăng nhập thành công.',
         })
-        router.push('/tasks')
+        if (inviteToken) {
+          router.push(`/invite/${inviteToken}`)
+        } else {
+          router.push('/tasks')
+        }
         router.refresh()
       } else {
         setError(result.error || 'Đăng nhập thất bại')
@@ -124,7 +128,7 @@ export function SignInForm() {
 
           <div className="text-center text-sm text-muted-foreground">
             Chưa có tài khoản?{' '}
-            <a href="/sign-up" className="font-medium text-primary underline-offset-4 hover:underline">
+            <a href={inviteToken ? `/sign-up?invite=${inviteToken}` : '/sign-up'} className="font-medium text-primary underline-offset-4 hover:underline">
               Tạo một cái
             </a>
           </div>

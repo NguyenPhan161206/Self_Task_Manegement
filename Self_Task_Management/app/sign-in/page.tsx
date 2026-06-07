@@ -2,7 +2,12 @@ import { CheckSquare, Shield, Zap } from 'lucide-react'
 
 import { SignInForm } from '@/feature/auth/components/SignInForm'
 
-export default function SignInPage() {
+interface Props {
+  searchParams: Promise<{ invite?: string }>
+}
+
+export default async function SignInPage({ searchParams }: Props) {
+  const { invite } = await searchParams
   return (
     <div className="min-h-[calc(100vh-3.5rem)] flex flex-col lg:flex-row">
       {/* Left branding panel */}
@@ -54,7 +59,7 @@ export default function SignInPage() {
             <h1 className="text-2xl font-semibold tracking-tight">Chào mừng trở lại</h1>
           </div>
 
-          <SignInForm />
+          <SignInForm inviteToken={invite} />
         </div>
       </div>
     </div>

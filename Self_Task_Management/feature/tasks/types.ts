@@ -13,6 +13,8 @@ export interface TaskFilter {
   statuses?: TaskStatus[]
   priorities?: TaskPriority[]
   tags?: string[]
+  groupId?: number
+  includeGroupTasks?: boolean
 }
 
 export const TASK_STATUSES: TaskStatus[] = ['todo', 'in_progress', 'done']
@@ -22,6 +24,7 @@ export interface TaskWithMeta extends Task {
   isOverdue?: boolean
   daysUntilDue?: number | null
   taskTags?: { tags: Pick<Tag, 'id' | 'name'> }[]
+  groupName?: string
 }
 
 export type PersonalTask = Database['public']['Tables']['personal_tasks']['Row']

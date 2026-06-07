@@ -77,6 +77,11 @@ function TaskCardInner({ task, onStatusChange, onEdit, className }: TaskCardProp
         <Badge variant={STATUS_COLORS[task.status || 'todo'] || 'outline'} className="text-[10px] px-1.5 py-0">
           {STATUS_LABELS[task.status || 'todo']}
         </Badge>
+        {task.groupName && (
+          <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-primary/30 text-primary">
+            {task.groupName}
+          </Badge>
+        )}
         {task.start_date && (
           <span className="text-[11px] text-muted-foreground">
             Bắt đầu: {new Date(task.start_date).toLocaleDateString('vi-VN')}

@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient, clearAuthCookies } from '@/lib/supabase/server'
 
 /**
  * Server Action: Sign in with email + password.
@@ -134,6 +134,16 @@ export async function signUp(formData: FormData) {
 
   revalidatePath('/', 'layout')
 
+  // ── Step 5: Process invite token if present ──
+  const inviteToken = (formData.get('invite_token') as string) || ''
+  if (inviteToken) {
+    const { verifyInvitation } = await import('@/feature/groups/actions')
+    const invResult = await verifyInvitation(inviteToken)
+    if (invResult.success && invResult.groupId) {
+      redirect(`/groups/${invResult.groupId}`)
+    }
+  }
+
   return {
     success: true,
     message: 'Tài khoản đã được tạo thành công!',
@@ -147,6 +157,7 @@ export async function signOut() {
   const supabase = await createClient()
 
   await supabase.auth.signOut()
+  await clearAuthCookies()
 
   revalidatePath('/', 'layout')
   redirect('/sign-in')

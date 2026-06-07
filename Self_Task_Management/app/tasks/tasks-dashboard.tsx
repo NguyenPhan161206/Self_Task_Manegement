@@ -22,6 +22,7 @@ import { KanbanBoard } from '@/feature/tasks/components/KanbanBoard'
 import { TaskEmpty } from '@/feature/tasks/components/TaskEmpty'
 import { useTags } from '@/feature/tags/hooks/useTags'
 import { TagManager } from '@/feature/tags/components/TagManager'
+import { useGroups } from '@/feature/groups/hooks/useGroups'
 import type { TaskPriority, TaskStatus, TaskWithMeta } from '@/feature/tasks/types'
 
 export function TasksDashboard() {
@@ -29,6 +30,7 @@ export function TasksDashboard() {
   const [statusFilters, setStatusFilters] = useState<TaskStatus[]>([])
   const [priorityFilters, setPriorityFilters] = useState<TaskPriority[]>([])
   const [tagFilters, setTagFilters] = useState<string[]>([])
+  const [groupFilters, setGroupFilters] = useState<number[]>([])
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editTask, setEditTask] = useState<TaskWithMeta | null>(null)
 
@@ -37,9 +39,11 @@ export function TasksDashboard() {
     statuses: statusFilters,
     priorities: priorityFilters,
     tags: tagFilters,
+    includeGroupTasks: true,
   })
 
   const { tags: globalTags, refetch: refetchTags } = useTags()
+  const { groups } = useGroups()
 
   const handleTasksChange = useCallback((updated: TaskWithMeta[]) => {
     setTasks(updated)
@@ -49,6 +53,7 @@ export function TasksDashboard() {
     setStatusFilters([])
     setPriorityFilters([])
     setTagFilters([])
+    setGroupFilters([])
   }, [])
 
   const availableTags = globalTags
@@ -159,6 +164,9 @@ export function TasksDashboard() {
           availableTags={availableTags}
           tasksLoading={isInitialLoading}
           onClearAll={clearAllFilters}
+          groupFilters={groupFilters}
+          onGroupChange={setGroupFilters}
+          availableGroups={groups}
         />
       </aside>
     </div>

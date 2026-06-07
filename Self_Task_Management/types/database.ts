@@ -160,29 +160,130 @@ export type Database = {
           },
         ]
       }
+      group_modules: {
+        Row: {
+          enabled: boolean
+          group_id: number
+          id: number
+          module_id: number
+        }
+        Insert: {
+          enabled?: boolean
+          group_id: number
+          id?: never
+          module_id: number
+        }
+        Update: {
+          enabled?: boolean
+          group_id?: number
+          id?: never
+          module_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_modules_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_modules_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       groups: {
         Row: {
           avatar: string | null
+          created_at: string | null
+          created_by: number | null
           description: string | null
           id: number
           name: string
           status: string | null
+          updated_at: string | null
         }
         Insert: {
           avatar?: string | null
+          created_at?: string | null
+          created_by?: number | null
           description?: string | null
           id?: never
           name: string
           status?: string | null
+          updated_at?: string | null
         }
         Update: {
           avatar?: string | null
+          created_at?: string | null
+          created_by?: number | null
           description?: string | null
           id?: never
           name?: string
           status?: string | null
+          updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "groups_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invitations: {
+        Row: {
+          created_at: string | null
+          email: string
+          expires_at: string | null
+          group_id: number
+          id: number
+          invited_by: number
+          status: string
+          token: string
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          expires_at?: string | null
+          group_id: number
+          id?: never
+          invited_by: number
+          status?: string
+          token: string
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          expires_at?: string | null
+          group_id?: number
+          id?: never
+          invited_by?: number
+          status?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invitations_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invitations_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       modules: {
         Row: {
@@ -198,6 +299,47 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string | null
+          data: Json
+          id: number
+          is_read: boolean
+          message: string | null
+          title: string
+          type: string
+          user_id: number
+        }
+        Insert: {
+          created_at?: string | null
+          data?: Json
+          id?: never
+          is_read?: boolean
+          message?: string | null
+          title: string
+          type: string
+          user_id: number
+        }
+        Update: {
+          created_at?: string | null
+          data?: Json
+          id?: never
+          is_read?: boolean
+          message?: string | null
+          title?: string
+          type?: string
+          user_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       permissions: {
         Row: {
@@ -449,6 +591,7 @@ export type Database = {
       }
       tasks: {
         Row: {
+          assignee_id: number | null
           attachments: string | null
           completed_date: string | null
           created_at: string | null
@@ -465,6 +608,7 @@ export type Database = {
           title: string
         }
         Insert: {
+          assignee_id?: number | null
           attachments?: string | null
           completed_date?: string | null
           created_at?: string | null
@@ -481,6 +625,7 @@ export type Database = {
           title: string
         }
         Update: {
+          assignee_id?: number | null
           attachments?: string | null
           completed_date?: string | null
           created_at?: string | null
@@ -502,6 +647,13 @@ export type Database = {
             columns: ["group_id"]
             isOneToOne: false
             referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_assignee_id_fkey"
+            columns: ["assignee_id"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
           {
@@ -571,7 +723,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      current_user_id: { Args: never; Returns: number }
       get_max_tags_per_user: { Args: never; Returns: number }
+      is_group_admin: { Args: { gid: number }; Returns: boolean }
+      is_group_member: { Args: { gid: number }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never

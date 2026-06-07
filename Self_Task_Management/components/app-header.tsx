@@ -17,6 +17,7 @@ import {
 import { ThemeToggle } from '@/components/theme-toggle'
 import { useAuth } from '@/feature/auth/hooks/useAuth'
 import { signOut } from '@/feature/auth/actions'
+import { NotificationBell } from '@/feature/notifications/components/NotificationBell'
 
 export function AppHeader() {
   const { user, loading } = useAuth()
@@ -41,6 +42,7 @@ export function AppHeader() {
 
         <div className="flex items-center gap-2">
           <ThemeToggle />
+          {user && <NotificationBell />}
           {loading ? (
             <div className="h-8 w-20 animate-pulse rounded-md bg-muted" />
           ) : user ? (
